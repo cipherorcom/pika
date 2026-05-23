@@ -7,7 +7,7 @@ require (
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/go-errors/errors v1.5.1
 	github.com/go-orz/cache v0.0.4
-	github.com/go-orz/orz v0.3.1
+	github.com/go-orz/orz v0.3.2
 	github.com/go-orz/orz/drivers/postgres v0.0.0-20260412101132-8a9ad72b8530
 	github.com/go-orz/orz/drivers/sqlite v0.0.0-20260412101132-8a9ad72b8530
 	github.com/go-orz/toolkit v0.1.0
@@ -32,7 +32,6 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil/v4 v4.26.4
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8
-	github.com/spf13/afero v1.15.0
 	github.com/spf13/cobra v1.10.2
 	github.com/valyala/fasttemplate v1.2.2
 	go.etcd.io/bbolt v1.4.3
@@ -77,6 +76,7 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
+	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/spf13/viper v1.21.0 // indirect
