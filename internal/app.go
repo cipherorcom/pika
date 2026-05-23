@@ -100,6 +100,8 @@ func setup(app *orz.App) error {
 
 	// 启动流量重置检查任务(每小时检查一次)
 	go startTrafficResetCheck(ctx, components, app.Logger())
+	// 启动机器到期提醒检查任务(每小时检查一次)
+	go startAgentExpireCheck(ctx, components, app.Logger())
 
 	// 启动 DDNS 定时任务
 	go components.DDNSService.Run(ctx)
@@ -445,6 +447,31 @@ func startTrafficResetCheck(ctx context.Context, components *AppComponents, logg
 			if err := components.TrafficService.CheckAndResetTraffic(ctx); err != nil {
 				logger.Error("流量重置检查失败", zap.Error(err))
 			}
+		}
+	}
+}
+
+// startAgentExpireCheck 启动机器到期提醒定时任务
+func startAgentExpireCheck(ctx context.Context, components *AppComponents, logger *zap.Logger) {
+	logger.Info("启动机器到期提醒检查任务")
+
+	ticker := time.NewTicker(1 * time.Hour) // 每小时检查一次
+	defer ticker.Stop()
+
+	check := func() {
+		if err := components.AlertService.CheckAgentExpireAlerts(ctx); err != nil {
+			logger.Error("机器到期提醒检查失败", zap.Error(err))
+		}
+	}
+
+	check()
+	for {
+		select {
+		case <-ctx.Done():
+			logger.Info("机器到期提醒检查任务已停止")
+			return
+		case <-ticker.C:
+			check()
 		}
 	}
 }
