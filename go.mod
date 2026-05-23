@@ -7,7 +7,7 @@ require (
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/go-errors/errors v1.5.1
 	github.com/go-orz/cache v0.0.4
-	github.com/go-orz/orz v0.3.2
+	github.com/go-orz/orz v0.3.3
 	github.com/go-orz/orz/drivers/postgres v0.0.0-20260412101132-8a9ad72b8530
 	github.com/go-orz/orz/drivers/sqlite v0.0.0-20260412101132-8a9ad72b8530
 	github.com/go-orz/toolkit v0.1.0
