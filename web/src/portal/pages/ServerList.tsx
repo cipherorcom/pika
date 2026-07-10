@@ -1,6 +1,7 @@
 import {type ReactNode, useMemo, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {ArrowDown, ArrowUp, Filter, Hand, HardDrive, Link2, Radio, Server, Wifi, type LucideIcon} from 'lucide-react';
+import {Link} from 'react-router-dom';
 import {getPublicTags, listAgents} from '@/api/agent.ts';
 import type {Agent, LatestMetrics} from '@/types';
 import {cn} from '@/lib/utils.ts';
@@ -56,8 +57,44 @@ const OverviewFilterCard = ({title, icon: Icon, active, onClick, children, tone}
     </button>
 );
 
+const ServerListRow = ({server}: {server: AgentWithMetrics}) => {
+    const isOnline = server.status === 1;
+    const metrics = server.metrics;
+    const cpu = metrics?.cpu?.usagePercent ?? 0;
+    const memory = metrics?.memory?.usagePercent ?? 0;
+    const disk = metrics?.disk?.usagePercent ?? 0;
+    const upload = metrics?.network?.totalBytesSentRate ?? 0;
+    const download = metrics?.network?.totalBytesRecvRate ?? 0;
+    const traffic = server.trafficStats;
+    const trafficText = traffic?.enabled && traffic.limit > 0
+        ? `${formatBytes(traffic.used, 1)} / ${formatBytes(traffic.limit, 1)}`
+        : '—';
+
+    return (
+        <Link to={`/servers/${server.id.substring(0, 8)}`} aria-label={`查看探针 ${server.name || server.hostname} 的详情`} className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300">
+            <article className="grid gap-3 rounded-xl border border-slate-200 bg-white/74 p-3.5 backdrop-blur-md transition hover:border-teal-300 hover:shadow-lg dark:border-white/15 dark:bg-[#061a2c]/70 dark:hover:border-teal-200/45 sm:grid-cols-[minmax(190px,1.3fr)_repeat(3,minmax(84px,.65fr))_minmax(170px,1fr)] sm:items-center">
+                <div className="min-w-0">
+                    <div className="flex items-center gap-2"><span className={cn('h-2 w-2 rounded-full', isOnline ? 'bg-emerald-400' : 'bg-rose-400')}/><h3 className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{server.name || server.hostname}</h3><span className={cn('rounded px-1.5 py-0.5 text-[10px]', isOnline ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/10 text-rose-700 dark:text-rose-300')}>{isOnline ? '在线' : '离线'}</span></div>
+                    <p className="mt-1 truncate text-[10px] text-slate-500 dark:text-slate-400">{server.os || '未知系统'} · {server.arch || '—'}</p>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-mono tabular-nums sm:contents">
+                    <div><p className="text-slate-500 dark:text-slate-400">CPU</p><p className="mt-1 font-semibold text-slate-800 dark:text-slate-100">{cpu.toFixed(1)}%</p></div>
+                    <div><p className="text-slate-500 dark:text-slate-400">内存</p><p className="mt-1 font-semibold text-slate-800 dark:text-slate-100">{memory.toFixed(1)}%</p></div>
+                    <div><p className="text-slate-500 dark:text-slate-400">存储</p><p className="mt-1 font-semibold text-slate-800 dark:text-slate-100">{disk.toFixed(1)}%</p></div>
+                </div>
+                <div className="flex items-center justify-between gap-3 text-[11px] font-mono tabular-nums sm:block sm:text-right">
+                    <span className="text-slate-500 dark:text-slate-400">网络</span>
+                    <div className="mt-1 flex justify-end gap-2"><span className="text-sky-600 dark:text-sky-300">↑ {formatSpeed(upload)}</span><span className="text-blue-600 dark:text-blue-300">↓ {formatSpeed(download)}</span></div>
+                    <div className="mt-1 text-slate-500 dark:text-slate-400">流量 {trafficText}</div>
+                </div>
+            </article>
+        </Link>
+    );
+};
+
 const ServerList = () => {
     const [selectedTag, setSelectedTag] = useState('');
+    const defaultView = window.SystemConfig?.DefaultView === 'list' ? 'list' : 'grid';
     const {data: agents = [], isLoading} = useQuery<AgentWithMetrics[]>({
         queryKey: ['agents', 'online'],
         queryFn: async () => (await listAgents()).data || [],
@@ -148,7 +185,12 @@ const ServerList = () => {
                 </div>
             </div>
 
-            {displayAgents.length === 0 ? <EmptyState title={selectedTag ? '没有匹配的探针' : '暂无探针'} description={selectedTag ? `标签 “${selectedTag}” 下暂无探针。` : '注册并启动探针后，它会显示在这里。'}/> : (
+            {displayAgents.length === 0 ? <EmptyState title={selectedTag ? '没有匹配的探针' : '暂无探针'} description={selectedTag ? `标签 “${selectedTag}” 下暂无探针。` : '注册并启动探针后，它会显示在这里。'}/> : defaultView === 'list' ? (
+                <div className="space-y-2">
+                    <div className="hidden grid-cols-[minmax(190px,1.3fr)_repeat(3,minmax(84px,.65fr))_minmax(170px,1fr)] gap-3 px-3.5 text-[10px] font-medium text-slate-500 dark:text-slate-400 sm:grid"><span>探针</span><span className="text-center">CPU</span><span className="text-center">内存</span><span className="text-center">存储</span><span className="text-right">实时网络 / 流量</span></div>
+                    {displayAgents.map(server => <ServerListRow key={server.id} server={server}/>) }
+                </div>
+            ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {displayAgents.map(server => <ServerCard key={server.id} server={server}/>) }
                 </div>
