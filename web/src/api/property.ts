@@ -85,6 +85,7 @@ export interface SystemConfig {
     systemNameEn: string;  // 英文名称
     systemNameZh: string;  // 中文名称
     logoBase64: string;    // Logo 的 base64 编码
+    backgroundBase64: string; // 公共页面背景图的 base64 编码
     icpCode: string;       // ICP 备案号
     defaultView: string;   // 默认视图 grid,list
     customCSS: string;     // 自定义 CSS

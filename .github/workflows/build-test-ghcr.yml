@@ -3,7 +3,7 @@ name: 构建 amd64 测试镜像到 GHCR
 on:
   push:
     branches:
-      - main
+      - master
 
 env:
   # 使用 GitHub Container Registry
@@ -110,7 +110,7 @@ jobs:
         run: |
           echo "## amd64 测试镜像构建成功 🎉" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**分支:** main" >> $GITHUB_STEP_SUMMARY
+          echo "**分支:** master" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**镜像标签:**" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY

@@ -1,24 +1,9 @@
 import type {FC} from 'react';
-import {
-    Activity,
-    AlertTriangle,
-    ArrowDown,
-    ArrowUp,
-    Calendar,
-    Clock,
-    Cpu,
-    HardDrive,
-    MemoryStick,
-    Network,
-    Thermometer
-} from 'lucide-react';
+import {ArrowDown, ArrowUp, HardDrive, MemoryStick, Microchip, Network, Server} from 'lucide-react';
+import {Link} from 'react-router-dom';
 import type {Agent, LatestMetrics} from '@/types';
-import CompactResourceBar from '@portal/components/CompactResourceBar';
-import {formatBytes, formatSpeed, formatUptime} from '@/lib/format.ts';
-import CyberCard from "@portal/components/CyberCard.tsx";
-import {Link} from "react-router-dom";
-import {isExpired} from "@portal/utils/server.ts";
-import {cn} from "@/lib/utils.ts";
+import {cn} from '@/lib/utils.ts';
+import {formatBytes, formatSpeed} from '@/lib/format.ts';
 
 interface AgentWithMetrics extends Agent {
     metrics?: LatestMetrics;
@@ -28,236 +13,122 @@ interface ServerCardProps {
     server: AgentWithMetrics;
 }
 
-const calculateNetworkSpeed = (metrics?: LatestMetrics) => {
-    if (!metrics?.network) {
-        return {upload: 0, download: 0};
-    }
-    return {
-        upload: metrics.network.totalBytesSentRate,
-        download: metrics.network.totalBytesRecvRate
-    };
-};
+const clampPercent = (value?: number) => Math.max(0, Math.min(100, value ?? 0));
 
-const calculateDiskUsage = (metrics?: LatestMetrics) => {
-    if (!metrics?.disk) {
-        return 0;
-    }
-    return metrics.disk.usagePercent;
-};
+const Metric = ({label, value, icon: Icon, tone = 'bg-emerald-400'}: {
+    label: string;
+    value: string;
+    icon?: typeof Microchip;
+    tone?: string;
+}) => (
+    <div className="min-w-0">
+        <div className="mb-1 flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
+            {Icon ? <Icon className="h-3 w-3 shrink-0" aria-hidden="true"/> : null}
+            <span className="truncate">{label}</span>
+        </div>
+        <div className="font-mono text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-100">{value}</div>
+        <div className="mt-1 h-0.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+            <div className={cn('h-full rounded-full transition-[width] duration-300 motion-reduce:transition-none', tone)}
+                 style={{width: value === '-' ? '0%' : `${Math.max(8, Math.min(100, Number.parseFloat(value) || 0))}%`}}/>
+        </div>
+    </div>
+);
 
-const getTemperatures = (metrics?: LatestMetrics) => {
-    if (!metrics?.temperature || metrics.temperature.length === 0) {
-        return [];
-    }
-    // 返回所有温度数据
-    return metrics.temperature.sort((a, b) => a.type.localeCompare(b.type));
-};
-
-const getTrafficProgressColor = (percent: number) => {
-    if (percent >= 100) return 'bg-red-500';
-    if (percent >= 90) return 'bg-orange-500';
-    if (percent >= 80) return 'bg-yellow-500';
-    return 'bg-emerald-500';
-};
+const Traffic = ({label, value, tone}: {label: string; value: string; tone: string}) => (
+    <div className="rounded-md border border-slate-200/80 bg-slate-100/70 px-2 py-1.5 text-center dark:border-white/10 dark:bg-black/20">
+        <div className="text-[10px] text-slate-500 dark:text-slate-400">{label}</div>
+        <div className={cn('mt-0.5 font-mono text-[11px] font-semibold tabular-nums', tone)}>{value}</div>
+    </div>
+);
 
 const ServerCard: FC<ServerCardProps> = ({server}) => {
     const isOnline = server.status === 1;
-    const cpuUsage = server.metrics?.cpu?.usagePercent ?? 0;
-    const memoryUsage = server.metrics?.memory?.usagePercent ?? 0;
-    const memoryTotal = server.metrics?.memory?.total ?? 0;
-    const memoryUsed = server.metrics?.memory?.used ?? 0;
-    const diskUsage = calculateDiskUsage(server.metrics);
-    const diskTotal = server.metrics?.disk?.total ?? 0;
-    const diskUsed = server.metrics?.disk?.used ?? 0;
-    const {upload, download} = calculateNetworkSpeed(server.metrics);
-    const temperatures = getTemperatures(server.metrics);
-    const netConn = server.metrics?.networkConnection;
+    const metrics = server.metrics;
+    const cpu = clampPercent(metrics?.cpu?.usagePercent);
+    const memory = clampPercent(metrics?.memory?.usagePercent);
+    const disk = clampPercent(metrics?.disk?.usagePercent);
+    const upload = metrics?.network?.totalBytesSentRate ?? 0;
+    const download = metrics?.network?.totalBytesRecvRate ?? 0;
+    const uploadTotal = metrics?.network?.totalBytesSentTotal ?? 0;
+    const downloadTotal = metrics?.network?.totalBytesRecvTotal ?? 0;
     const traffic = server.trafficStats;
-    const trafficUsagePercent = traffic?.enabled && traffic.limit > 0
+    const trafficUsage = traffic?.enabled && traffic.limit > 0
         ? Math.min(100, (traffic.used / traffic.limit) * 100)
-        : 0;
+        : null;
+    const trafficTone = trafficUsage === null
+        ? 'bg-teal-400'
+        : trafficUsage >= 100 ? 'bg-rose-500' : trafficUsage >= 90 ? 'bg-orange-400' : trafficUsage >= 80 ? 'bg-amber-400' : 'bg-teal-400';
+    const daysUntilExpiry = server.expireTime && server.expireTime > 0
+        ? Math.ceil((server.expireTime - Date.now()) / (24 * 60 * 60 * 1000))
+        : null;
+    const name = server.name || server.hostname;
 
     return (
-        <Link to={`/servers/${server.id.substring(0, 8)}`}>
-            <CyberCard>
-                <div className="relative z-10 p-5 space-y-2">
-                    {/* 顶部：名称和状态 */}
+        <Link
+            to={`/servers/${server.id.substring(0, 8)}`}
+            aria-label={`查看探针 ${name} 的详情`}
+            className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        >
+            <article className={cn(
+                'relative min-h-[178px] overflow-hidden rounded-xl border p-3.5 shadow-sm transition duration-200 ease-out',
+                'bg-white/78 backdrop-blur-md hover:-translate-y-0.5 hover:shadow-lg dark:bg-[#061a2c]/72 dark:shadow-black/50',
+                isOnline
+                    ? 'border-slate-200/80 hover:border-cyan-400/70 dark:border-teal-100/20 dark:hover:border-teal-200/55'
+                    : 'border-rose-300/80 opacity-80 dark:border-rose-400/30'
+            )}>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-cyan-300/[0.14] via-transparent to-blue-500/[0.11] opacity-0 transition-opacity duration-200 group-hover:opacity-100"/>
+                <div className="relative">
                     <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                            <div className={cn(
-                                'font-bold text-slate-800 dark:text-cyan-100 font-mono text-base truncate',
-                                isExpired(server.expireTime) ? 'text-red-600 dark:text-red-400' : ''
-                            )}>
-                                {server.name || server.hostname}
-                            </div>
-                            <div
-                                className="flex items-center gap-2 text-xs text-gray-600 dark:text-cyan-500 mt-1 font-mono uppercase">
-                                <span>{server.os}</span>
-                                <span className="w-px h-2 bg-gray-400 dark:bg-cyan-800"></span>
-                                <span>{server.arch}</span>
-                            </div>
+                        <div className="flex min-w-0 items-center gap-2">
+                            <span className={cn('h-2 w-2 shrink-0 rounded-full', isOnline ? 'bg-emerald-400 shadow-[0_0_8px_rgba(74,222,128,.9)]' : 'bg-rose-400')}/>
+                            <h2 className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{name}</h2>
                         </div>
-                        {server.tags && server.tags.length > 0 && (
-                            <div className="flex gap-1 flex-wrap justify-end">
-                                {server.tags.slice(0, 2).map(tag => (
-                                    <span
-                                        key={tag}
-                                        className="px-1.5 py-0.5 bg-gray-100 dark:bg-cyan-900/40 text-gray-700 dark:text-cyan-500 border border-gray-300 dark:border-cyan-700/50 text-xs font-mono rounded-sm whitespace-nowrap"
-                                    >
-                                #{tag}
-                            </span>
-                                ))}
-                                {server.tags.length > 2 && (
-                                    <span
-                                        className="px-1.5 py-0.5 bg-gray-100 dark:bg-cyan-900/40 text-gray-700 dark:text-cyan-500 border border-gray-300 dark:border-cyan-700/50 text-xs font-mono rounded-sm">
-                                +{server.tags.length - 2}
-                            </span>
-                                )}
-                            </div>
-                        )}
+                        <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium', isOnline ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/10 text-rose-700 dark:text-rose-300')}>
+                            {isOnline ? '在线' : '离线'}
+                        </span>
                     </div>
 
-                    {isOnline && server.metrics?.host && (
-                        <div className="flex items-center gap-2 text-xs font-mono mt-1.5">
-                            <div className="flex items-center gap-1 text-gray-500 dark:text-cyan-500">
-                                <Clock className="w-3 h-3"/>
-                                <span>{formatUptime(server.metrics.host.uptime)}</span>
-                            </div>
-                            <span className="w-px h-2 bg-gray-400 dark:bg-cyan-800"></span>
-                            <div className="flex items-center gap-1 text-gray-500 dark:text-cyan-500">
-                                <Activity className="w-3 h-3"/>
-                                <span>{server.metrics.host.procs} 进程</span>
-                            </div>
-                        </div>
-                    )}
+                    <div className="mt-1 flex min-h-4 items-center gap-1.5 overflow-hidden text-[10px] text-slate-500 dark:text-slate-400">
+                        <Server className="h-3 w-3 shrink-0" aria-hidden="true"/>
+                        <span className="truncate">{server.os || '未知系统'}</span>
+                        {server.arch ? <><span aria-hidden="true">·</span><span>{server.arch}</span></> : null}
+                        {daysUntilExpiry !== null && <><span aria-hidden="true">·</span><span className={cn(daysUntilExpiry <= 0 ? 'text-rose-500' : daysUntilExpiry <= 30 ? 'text-amber-500 dark:text-amber-300' : 'text-slate-500 dark:text-slate-400')}>{Math.max(daysUntilExpiry, 0)}天</span></>}
+                        {server.tags?.slice(0, 2).map(tag => <span key={tag} className="rounded bg-slate-100 px-1 py-px text-[9px] dark:bg-white/10">{tag}</span>)}
+                    </div>
 
-                    {/* 资源使用情况 */}
                     {isOnline ? (
-                        <div className="space-y-1">
-                            <CompactResourceBar
-                                value={cpuUsage}
-                                label="CPU"
-                                icon={Cpu}
-                                subtext={server.metrics?.cpu ? `${server.metrics.cpu.physicalCores}核` : null}
-                                color="bg-blue-500"
-                            />
-                            <CompactResourceBar
-                                value={memoryUsage}
-                                label="RAM"
-                                icon={MemoryStick}
-                                subtext={`${formatBytes(memoryUsed, 0)}/${formatBytes(memoryTotal, 0)}`}
-                                color="bg-purple-500"
-                            />
-                            <CompactResourceBar
-                                value={diskUsage}
-                                label="DSK"
-                                icon={HardDrive}
-                                subtext={`${formatBytes(diskUsed, 0)}/${formatBytes(diskTotal, 0)}`}
-                                color="bg-emerald-500"
-                            />
-                            {temperatures.length > 0 && (
-                                <div className="flex items-center gap-2 mt-1 text-xs font-mono pt-1 flex-wrap">
-                                    <Thermometer className="w-3 h-3 text-orange-400"/>
-                                    {temperatures.map((temp, index) => (
-                                        <span key={index} className="flex items-center gap-1">
-                                        <span className="text-orange-400">{temp.temperature?.toFixed(1)}°C</span>
-                                        <span className="text-gray-500 dark:text-cyan-500">{temp.type}</span>
-                                            {index < temperatures.length - 1 &&
-                                                <span className="text-gray-400 dark:text-cyan-900">|</span>}
-                                    </span>
-                                    ))}
+                        <>
+                            <div className="mt-3 grid grid-cols-6 gap-2">
+                                <Metric label="CPU" value={`${cpu.toFixed(1)}%`} icon={Microchip} tone="bg-teal-400"/>
+                                <Metric label="内存" value={`${memory.toFixed(1)}%`} icon={MemoryStick} tone="bg-cyan-400"/>
+                                <Metric label="存储" value={`${disk.toFixed(1)}%`} icon={HardDrive} tone="bg-emerald-400"/>
+                                <Metric label="上行" value={formatSpeed(upload)} icon={ArrowUp} tone="bg-sky-400"/>
+                                <Metric label="下行" value={formatSpeed(download)} icon={ArrowDown} tone="bg-blue-400"/>
+                                <Metric label="连接" value={`${metrics?.networkConnection?.established ?? 0}`} icon={Network} tone="bg-amber-400"/>
+                            </div>
+                            <div className="mt-3 grid grid-cols-2 gap-2">
+                                <Traffic label="累计上传" value={formatBytes(uploadTotal, 1)} tone="text-sky-700 dark:text-sky-300"/>
+                                <Traffic label="累计下载" value={formatBytes(downloadTotal, 1)} tone="text-blue-700 dark:text-blue-300"/>
+                            </div>
+                            {trafficUsage !== null && traffic && (
+                                <div className="mt-3 border-t border-slate-200/80 pt-2.5 dark:border-white/10">
+                                    <div className="flex items-center justify-between gap-3 text-[10px] text-slate-500 dark:text-slate-400">
+                                        <span>流量限额</span>
+                                        <span className="font-mono font-medium tabular-nums text-slate-700 dark:text-slate-200">{formatBytes(traffic.used, 1)} / {formatBytes(traffic.limit, 1)} · {trafficUsage.toFixed(1)}%</span>
+                                    </div>
+                                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-200/80 dark:bg-white/10" role="progressbar" aria-label="流量限额使用情况" aria-valuemin={0} aria-valuemax={100} aria-valuenow={trafficUsage}>
+                                        <div className={cn('h-full rounded-full', trafficTone)} style={{width: `${trafficUsage}%`}}/>
+                                    </div>
                                 </div>
                             )}
-                        </div>
+                        </>
                     ) : (
-                        <div className="text-xs text-rose-500 font-mono flex items-center gap-2 py-2">
-                            <AlertTriangle className="w-4 h-4"/>
-                            <span>离线</span>
+                        <div className="mt-5 flex h-[84px] items-center justify-center rounded-lg border border-dashed border-rose-300/70 bg-rose-50/60 text-xs text-rose-600 dark:border-rose-400/30 dark:bg-rose-500/5 dark:text-rose-300">
+                            探针暂时无法连接
                         </div>
                     )}
-
-                    {/* 网络和流量 */}
-                    <div className="pt-2 border-t border-slate-200 dark:border-cyan-900/30 space-y-2">
-                        <div className="flex items-center justify-between">
-                            <div className="flex gap-3 text-xs font-mono">
-                            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400/80">
-                                <ArrowDown className="w-3 h-3"/>
-                                {formatSpeed(download)}
-                            </span>
-                                <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400/80">
-                                <ArrowUp className="w-3 h-3"/>
-                                    {formatSpeed(upload)}
-                            </span>
-                            </div>
-                            {server.expireTime > 0 && (
-                                <div
-                                    className={cn(
-                                        `text-xs font-mono flex items-center gap-1 text-gray-600 dark:text-cyan-500`,
-                                        // 剩余时间小于 30 天时显示为红色
-                                        isExpired(server.expireTime) ? 'text-red-600 dark:text-red-400' : ''
-                                    )}>
-                                    <Calendar className="w-3 h-3"/>
-                                    {new Date(server.expireTime).toLocaleDateString('zh-CN')}
-                                </div>
-                            )}
-                        </div>
-                        {isOnline && netConn && (
-                            <div className="flex gap-3 text-xs font-mono">
-                            <span className="flex items-center gap-1">
-                                <Network className="w-3 h-3 text-emerald-600 dark:text-emerald-400"/>
-                                <span
-                                    className="text-emerald-600 dark:text-emerald-400">{netConn.established || 0}</span>
-                                <span className="text-gray-600 dark:text-cyan-500">ESTABLISHED</span>
-                            </span>
-                                <span className="flex items-center gap-1">
-                                <Network className="w-3 h-3 text-blue-600 dark:text-blue-400"/>
-                                <span className="text-blue-600 dark:text-blue-400">{netConn.listen || 0}</span>
-                                <span className="text-gray-600 dark:text-cyan-500">LISTEN</span>
-                            </span>
-                                <span className="flex items-center gap-1">
-                                <Network className="w-3 h-3 text-rose-600 dark:text-rose-400"/>
-                                <span className="text-rose-600 dark:text-rose-400">{netConn.closeWait || 0}</span>
-                                <span className="text-gray-600 dark:text-cyan-500">CLOSE_WAIT</span>
-                            </span>
-                            </div>
-                        )}
-                        {traffic?.enabled && (
-                            <div className="pt-2 border-t border-slate-200 dark:border-cyan-900/30 space-y-1.5">
-                                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-cyan-600 font-mono">
-                                    <Activity className="w-3 h-3"/>
-                                    <span>{traffic.type === 'recv' ? '进站' : traffic.type === 'send' ? '出站' : '全部'}流量</span>
-                                </div>
-                                {traffic.limit > 0 ? (
-                                    <>
-                                        <div className="flex items-baseline justify-between">
-                                            <span className="text-xs text-gray-600 dark:text-cyan-500 font-mono">
-                                                {formatBytes(traffic.used, 1)} / {formatBytes(traffic.limit, 1)}
-                                            </span>
-                                            <span className="text-xs font-bold text-gray-700 dark:text-cyan-400 font-mono">
-                                                {trafficUsagePercent.toFixed(1)}%
-                                            </span>
-                                        </div>
-                                        <div className="h-1.5 bg-slate-200 dark:bg-cyan-900/50 rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full transition-all ${getTrafficProgressColor(trafficUsagePercent)}`}
-                                                style={{width: `${trafficUsagePercent}%`}}
-                                            />
-                                        </div>
-                                        <div className="text-xs text-gray-500 dark:text-cyan-600 font-mono">
-                                            重置日期: 每月 {traffic.resetDay} 号
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="text-xs text-gray-500 dark:text-cyan-600 font-mono">
-                                        已使用: {formatBytes(traffic.used, 1)}
-                                        <div className="text-xs text-gray-400 dark:text-cyan-700 mt-1">仅统计模式</div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
                 </div>
-            </CyberCard>
+            </article>
         </Link>
     );
 };

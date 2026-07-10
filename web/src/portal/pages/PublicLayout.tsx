@@ -1,33 +1,20 @@
+import {useState} from 'react';
 import {Outlet} from 'react-router-dom';
 import PublicHeader from '@portal/components/PublicHeader';
 import PublicFooter from '@portal/components/PublicFooter';
 
 const PublicLayout = () => {
+    const [hasCustomBackground, setHasCustomBackground] = useState(true);
     return (
-        <div className="bg-[#f0f2f5] dark:bg-[#05050a] text-slate-800 dark:text-slate-200 flex flex-col relative overflow-x-hidden transition-colors duration-500">
-            {/* 背景网格效果 */}
-            <div
-                className="fixed inset-0 pointer-events-none z-0 transition-opacity duration-500"
-                style={{
-                    backgroundImage: 'linear-gradient(to_right,#cbd5e180_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e180_1px,transparent_1px)',
-                    backgroundSize: '30px 30px',
-                }}
-            ></div>
-            {/* 暗色模式网格 */}
-            <div
-                className="fixed inset-0 pointer-events-none z-0 opacity-0 dark:opacity-100 transition-opacity duration-500"
-                style={{
-                    backgroundImage: 'linear-gradient(to_right,#4f4f4f1a_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f1a_1px,transparent_1px)',
-                    backgroundSize: '30px 30px',
-                }}
-            ></div>
-            {/* 顶部发光效果 */}
-            <div
-                className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-cyan-600/15 blur-[120px] rounded-full pointer-events-none z-0 opacity-40 dark:opacity-100 transition-opacity duration-500"
-            ></div>
+        <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-slate-100 text-slate-800 transition-colors duration-500 dark:bg-[#020713] dark:text-slate-100">
+            {/* 公开面板的视觉底图：内容区保留足够暗度，确保实时数据始终清晰可读。 */}
+            <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_15%_0%,#dbeafe_0%,#f8fafc_42%,#e0f2fe_100%)] bg-cover bg-center dark:bg-[url('/pika-night-monitor-bg.png')]"/>
+            {hasCustomBackground && <img src="/api/background" alt="" aria-hidden="true" onError={() => setHasCustomBackground(false)} className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover"/>}
+            <div className="pointer-events-none fixed inset-0 z-0 hidden bg-[linear-gradient(180deg,rgba(2,9,23,.68)_0%,rgba(2,11,26,.72)_42%,rgba(2,8,19,.91)_100%)] dark:block"/>
+            <div className="pointer-events-none fixed inset-x-0 top-20 z-0 hidden h-px bg-gradient-to-r from-transparent via-teal-200/35 to-transparent dark:block"/>
 
             <PublicHeader/>
-            <div className="relative z-10 flex flex-col min-h-screen pt-[81px]">
+            <div className="relative z-10 flex min-h-screen flex-col pt-[81px]">
                 <main className="flex-1">
                     <Outlet/>
                 </main>

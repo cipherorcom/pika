@@ -14,7 +14,7 @@ services:
     networks:
       - pika-network
   pika:
-    image: dushixiang/pika:latest
+    image: cipherorcom/pika:latest
     container_name: pika-server
     volumes:
       - ./config.yaml:/app/config.yaml

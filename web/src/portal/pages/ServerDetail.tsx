@@ -66,8 +66,8 @@ const ServerDetail = () => {
     }
 
     return (
-        <div className="bg-[#f0f2f5] dark:bg-[#05050a] min-h-screen">
-            <div className="mx-auto flex max-w-7xl flex-col px-4 pb-10 pt-4 sm:pt-6 sm:px-6 lg:px-8">
+        <div className="min-h-screen">
+            <div className="mx-auto flex max-w-[1440px] flex-col px-3 pb-12 pt-4 sm:px-5 sm:pt-6 lg:px-6">
                 {/* 头部区域 */}
                 <ServerHero
                     agent={agent}
@@ -76,7 +76,7 @@ const ServerDetail = () => {
                 />
 
                 {/* 主内容区 */}
-                <main className="flex-1 py-6 sm:py-8 lg:py-10 space-y-6 sm:space-y-8 lg:space-y-10">
+                <main className="flex-1 space-y-5 py-5 sm:space-y-6 sm:py-6 lg:space-y-7">
                     {/* 网络地址信息 */}
                     {(agent.ipv4 || agent.ipv6 || deviceIpInterfaces?.length > 0) && (
                         <NetworkAddressSection

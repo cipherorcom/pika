@@ -12,21 +12,12 @@ const CyberCard = ({className, children, animation, hover}: Props) => {
     return (
         <div
             className={cn(
-                "group bg-white/90 dark:bg-[#0f1016]/80 backdrop-blur-md border border-slate-200 dark:border-cyan-500/20 shadow-sm dark:shadow-[0_0_15px_rgba(6,182,212,0.05)] transition-all duration-300 cursor-pointer overflow-hidden relative rounded-xl dark:rounded-none",
-                hover && "hover:border-slate-300 dark:hover:border-cyan-500/50 hover:bg-white dark:hover:bg-[#0f1016]/90"
+                "group relative overflow-hidden rounded-2xl border border-slate-200 bg-white/82 shadow-sm backdrop-blur-md transition-all duration-300 dark:border-white/15 dark:bg-[#061a2c]/72 dark:shadow-[0_12px_32px_rgba(0,0,0,.18)]",
+                hover && "cursor-pointer hover:border-slate-300 hover:bg-white dark:hover:border-teal-200/35 dark:hover:bg-[#082038]/92"
             )}>
-            {/* 装饰性边框 - 仅在暗色模式下显示 */}
-            <div
-                className="hidden dark:block absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-cyan-500/30 group-hover:border-cyan-400 transition-colors duration-300"></div>
-            <div
-                className="hidden dark:block absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-cyan-500/30 group-hover:border-cyan-400 transition-colors duration-300"></div>
-            <div
-                className="hidden dark:block absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-cyan-500/30 group-hover:border-cyan-400 transition-colors duration-300"></div>
-            <div
-                className="hidden dark:block absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-cyan-500/30 group-hover:border-cyan-400 transition-colors duration-300"></div>
             {animation &&
                 <div
-                    className="hidden dark:block absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 -translate-y-full group-hover:translate-y-full transition-[transform,opacity] duration-1000 ease-in-out pointer-events-none will-change-transform"/>
+                    className="pointer-events-none absolute inset-0 -translate-y-full bg-gradient-to-b from-transparent via-teal-400/5 to-transparent opacity-0 transition-[transform,opacity] duration-1000 ease-in-out will-change-transform group-hover:translate-y-full group-hover:opacity-100"/>
             }
 
             <div className={cn("relative z-10 p-4", className)}>

@@ -72,7 +72,7 @@ const PublicHeader = () => {
     return (
         <>
             <header
-                className="border-b border-slate-200 dark:border-cyan-900/50 bg-white/80 dark:bg-[#05050a]/80 backdrop-blur-xl fixed top-0 left-0 right-0 z-40 transition-colors duration-300">
+                className="fixed left-0 right-0 top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-teal-100/15 dark:bg-[#020917]/86">
                 <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-8">
                         <Link to={'/'}>
@@ -88,10 +88,10 @@ const PublicHeader = () => {
                                     />
                                 </div>
                                 <div>
-                                    <h1 className="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 dark:from-cyan-400 dark:via-blue-400 dark:to-purple-400 uppercase italic">
+                                    <h1 className="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-sky-500 to-teal-500 dark:from-cyan-300 dark:via-sky-300 dark:to-teal-300 uppercase italic">
                                         {leftName}<span className="text-slate-800 dark:text-white">{rightName}</span>
                                     </h1>
-                                    <p className="text-xs text-slate-500 dark:text-cyan-500 font-mono tracking-[0.3em] uppercase">
+                                    <p className="text-xs text-slate-500 dark:text-teal-200/75 font-mono tracking-[0.3em] uppercase">
                                         {window.SystemConfig?.SystemNameZh}
                                     </p>
                                 </div>
@@ -108,16 +108,16 @@ const PublicHeader = () => {
                                     <button
                                         className={`
                           relative group flex items-center gap-2 py-2 text-xs font-bold tracking-widest transition-colors cursor-pointer font-mono uppercase
-                          ${activeTab === tab.id ? 'text-blue-600 dark:text-cyan-500' : 'text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-cyan-200'}
+                          ${activeTab === tab.id ? 'text-blue-600 dark:text-teal-200' : 'text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-teal-100'}
                         `}
                                     >
                                         <tab.icon
-                                            className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600 dark:text-cyan-500' : 'text-slate-400 dark:text-slate-600 group-hover:text-blue-500 dark:group-hover:text-cyan-200'}`}/>
+                                            className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600 dark:text-teal-200' : 'text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-teal-100'}`}/>
                                         {tab.label}
 
                                         {/* Active Indicator (Underline Glow) */}
                                         <span
-                                            className={`absolute -bottom-1 left-0 w-full h-[2px] bg-blue-600 dark:bg-cyan-500 shadow-[0_0_10px_rgba(37,99,235,0.8)] dark:shadow-[0_0_10px_rgba(34,211,238,0.8)] transition-transform duration-300 origin-left ${activeTab === tab.id ? 'scale-x-100' : 'scale-x-0'}`}></span>
+                                            className={`absolute -bottom-1 left-0 w-full h-[2px] bg-blue-600 dark:bg-teal-300 shadow-[0_0_10px_rgba(37,99,235,0.8)] dark:shadow-[0_0_12px_rgba(94,234,212,.7)] transition-transform duration-300 origin-left ${activeTab === tab.id ? 'scale-x-100' : 'scale-x-0'}`}></span>
                                     </button>
                                 </Link>
                             ))}
@@ -128,9 +128,9 @@ const PublicHeader = () => {
                     <div className="hidden md:flex items-center gap-2">
                         <div className="hidden lg:flex flex-col items-end">
                             <span
-                                className="text-xs font-mono text-slate-800 dark:text-cyan-500 font-bold">{currentTime.toLocaleTimeString()}</span>
+                                className="text-xs font-mono text-slate-800 dark:text-teal-100 font-bold">{currentTime.toLocaleTimeString()}</span>
                             <span
-                                className="text-xs text-slate-500 dark:text-cyan-500 font-mono tracking-widest">{currentTime.toLocaleDateString()}</span>
+                                className="text-xs text-slate-500 dark:text-teal-200/65 font-mono tracking-widest">{currentTime.toLocaleDateString()}</span>
                         </div>
                         <div className="h-6 w-[1px] bg-slate-300 dark:bg-cyan-900/50 hidden lg:block"></div>
 

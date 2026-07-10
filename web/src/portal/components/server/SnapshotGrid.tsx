@@ -47,23 +47,23 @@ export const SnapshotGrid = ({cards}: SnapshotGridProps) => (
             return (
                 <div
                     key={card.key}
-                    className="rounded-xl border border-slate-200 dark:border-cyan-900/50 bg-slate-50 dark:bg-black/40 p-4 transition hover:border-slate-300 dark:hover:border-cyan-700/50"
+                    className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 transition hover:border-slate-300 dark:border-white/10 dark:bg-[#020b19]/42 dark:hover:border-teal-200/30"
                 >
                     <div className="mb-3 flex items-start justify-between">
                         <div className="flex items-center gap-2">
-                            <span className={cn("flex h-9 w-9 items-center justify-center rounded-lg bg-gray-200 dark:bg-cyan-500/10", theme.icon)}>
+                            <span className={cn("flex h-9 w-9 items-center justify-center rounded-lg bg-gray-200 dark:bg-white/[.07]", theme.icon)}>
                                 <card.icon className="h-4 w-4"/>
                             </span>
-                            <p className="text-xs font-bold font-mono uppercase tracking-wider text-gray-700 dark:text-cyan-300">{card.title}</p>
+                            <p className="text-xs font-bold font-mono uppercase tracking-wider text-gray-700 dark:text-slate-200">{card.title}</p>
                         </div>
                         <span className={cn("text-xl font-bold", theme.highlight)}>{card.usagePercent}</span>
                     </div>
                     <div className="space-y-2">
                         {card.metrics.map((metric) => (
                             <div key={metric.label} className="flex items-center justify-between text-xs">
-                                <span className="text-gray-600 dark:text-cyan-500 font-mono text-xs uppercase tracking-wider">{metric.label}</span>
+                                <span className="text-gray-600 dark:text-slate-400 font-mono text-xs uppercase tracking-wider">{metric.label}</span>
                                 <span
-                                    className="ml-2 text-right font-medium text-slate-700 dark:text-cyan-200">{metric.value}</span>
+                                    className="ml-2 text-right font-medium text-slate-700 dark:text-slate-200">{metric.value}</span>
                             </div>
                         ))}
                     </div>

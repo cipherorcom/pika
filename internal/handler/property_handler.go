@@ -103,14 +103,23 @@ func (h *PropertyHandler) SetProperty(c echo.Context) error {
 func (h *PropertyHandler) GetLogo(c echo.Context) error {
 	sysConfig, err := h.service.GetSystemConfig(c.Request().Context())
 	if err != nil {
-		// 如果配置不存在，返回 404
 		return echo.NewHTTPError(http.StatusNotFound, "Logo 不存在")
 	}
+	return h.sendBase64Image(c, sysConfig.LogoBase64, "Logo")
+}
 
-	// 提取 logoBase64 字段
-	logoBase64 := sysConfig.LogoBase64
-	if logoBase64 == "" {
-		return echo.NewHTTPError(http.StatusNotFound, "Logo 不存在")
+// GetBackground 获取公共页面背景图（公开访问，返回图片文件流）
+func (h *PropertyHandler) GetBackground(c echo.Context) error {
+	sysConfig, err := h.service.GetSystemConfig(c.Request().Context())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "背景图不存在")
+	}
+	return h.sendBase64Image(c, sysConfig.BackgroundBase64, "背景图")
+}
+
+func (h *PropertyHandler) sendBase64Image(c echo.Context, imageBase64, imageName string) error {
+	if imageBase64 == "" {
+		return echo.NewHTTPError(http.StatusNotFound, imageName+"不存在")
 	}
 
 	// 解析 base64 数据
@@ -119,11 +128,11 @@ func (h *PropertyHandler) GetLogo(c echo.Context) error {
 	var contentType string
 
 	// 检查是否包含 data URI 前缀
-	if len(logoBase64) > 0 && logoBase64[:5] == "data:" {
+	if len(imageBase64) > 0 && imageBase64[:5] == "data:" {
 		// 查找逗号位置
 		commaIndex := -1
-		for i := 0; i < len(logoBase64) && i < 100; i++ {
-			if logoBase64[i] == ',' {
+		for i := 0; i < len(imageBase64) && i < 100; i++ {
+			if imageBase64[i] == ',' {
 				commaIndex = i
 				break
 			}
@@ -134,7 +143,7 @@ func (h *PropertyHandler) GetLogo(c echo.Context) error {
 		}
 
 		// 提取 MIME 类型
-		header := logoBase64[5:commaIndex]
+		header := imageBase64[5:commaIndex]
 		if len(header) > 7 && header[len(header)-7:] == ";base64" {
 			contentType = header[:len(header)-7]
 		} else {
@@ -142,7 +151,7 @@ func (h *PropertyHandler) GetLogo(c echo.Context) error {
 		}
 
 		// 解码 base64
-		base64Data := logoBase64[commaIndex+1:]
+		base64Data := imageBase64[commaIndex+1:]
 		var decodeErr error
 		imageData, decodeErr = base64.StdEncoding.DecodeString(base64Data)
 		if decodeErr != nil {
@@ -152,7 +161,7 @@ func (h *PropertyHandler) GetLogo(c echo.Context) error {
 	} else {
 		// 直接是 base64 字符串
 		var decodeErr error
-		imageData, decodeErr = base64.StdEncoding.DecodeString(logoBase64)
+		imageData, decodeErr = base64.StdEncoding.DecodeString(imageBase64)
 		if decodeErr != nil {
 			h.logger.Error("解码 base64 失败", zap.Error(decodeErr))
 			return echo.NewHTTPError(http.StatusInternalServerError, "解码图片数据失败")

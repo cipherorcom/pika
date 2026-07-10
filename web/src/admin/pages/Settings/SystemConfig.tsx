@@ -12,6 +12,7 @@ const SystemConfigComponent = () => {
     const { message: messageApi } = App.useApp();
     const queryClient = useQueryClient();
     const [logoPreview, setLogoPreview] = useState<string>('');
+    const [backgroundPreview, setBackgroundPreview] = useState<string>('');
     const [uploading, setUploading] = useState(false);
 
     // 获取系统配置
@@ -48,6 +49,7 @@ const SystemConfigComponent = () => {
             if (config.logoBase64) {
                 setLogoPreview(config.logoBase64);
             }
+            setBackgroundPreview(config.backgroundBase64 || '');
         }
     }, [config, form]);
 
@@ -99,6 +101,7 @@ const SystemConfigComponent = () => {
                 systemNameEn: values.systemNameEn,
                 systemNameZh: values.systemNameZh,
                 logoBase64: logoPreview,
+                backgroundBase64: backgroundPreview,
                 icpCode: values.icpCode || '',
                 defaultView: values.defaultView ?? true,
                 customCSS: values.customCSS || '',
@@ -121,6 +124,7 @@ const SystemConfigComponent = () => {
                 customJS: config.customJS,
             });
             setLogoPreview(config.logoBase64 || '');
+            setBackgroundPreview(config.backgroundBase64 || '');
         }
     };
 
@@ -130,6 +134,25 @@ const SystemConfigComponent = () => {
             return logoPreview;
         }
         return '/logo.png';
+    };
+
+    const beforeBackgroundUpload = (file: RcFile) => {
+        const isImage = file.type.startsWith('image/');
+        if (!isImage) {
+            messageApi.error('只能上传图片文件！');
+            return false;
+        }
+        const isLt10M = file.size / 1024 / 1024 < 10;
+        if (!isLt10M) {
+            messageApi.error('背景图片不能超过 10MB！');
+            return false;
+        }
+        setUploading(true);
+        fileToBase64(file)
+            .then((base64) => setBackgroundPreview(base64))
+            .catch(() => messageApi.error('转换背景图片失败'))
+            .finally(() => setUploading(false));
+        return false;
     };
 
     if (isLoading) {
@@ -241,6 +264,28 @@ const SystemConfigComponent = () => {
                                         {uploading ? '处理中...' : '上传 Logo'}
                                     </Button>
                                 </Upload>
+                            </Space>
+                        </Form.Item>
+
+                        <Form.Item
+                            label="公共页面背景图"
+                            tooltip="上传后将应用到公开监控页面。建议使用横向图片，文件大小不超过 10MB。"
+                        >
+                            <Space direction="vertical" className="w-full">
+                                {backgroundPreview && (
+                                    <div className="h-24 w-44 overflow-hidden rounded-lg border border-slate-200 bg-slate-950 shadow-sm">
+                                        <img src={backgroundPreview} alt="公共页面背景缩略图" className="h-full w-full object-cover"/>
+                                    </div>
+                                )}
+                                <Space wrap>
+                                    <Upload accept="image/*" showUploadList={false} beforeUpload={beforeBackgroundUpload} disabled={uploading}>
+                                        <Button icon={<UploadIcon size={16} />} loading={uploading}>
+                                            {uploading ? '处理中...' : backgroundPreview ? '更换背景图' : '上传背景图'}
+                                        </Button>
+                                    </Upload>
+                                    {backgroundPreview && <Button danger onClick={() => setBackgroundPreview('')}>移除背景</Button>}
+                                </Space>
+                                <span className="text-xs text-slate-500">公开页面会以铺满方式显示图片。</span>
                             </Space>
                         </Form.Item>
                     </Card>
