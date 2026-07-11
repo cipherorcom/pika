@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { App, Button, Card, Form, Input, Radio, Space, Spin, Upload } from 'antd';
+import { App, Button, Card, Form, Input, Radio, Slider, Space, Spin, Upload } from 'antd';
 import { Upload as UploadIcon, Grid3x3, List } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SystemConfig } from '@/api/property.ts';
@@ -43,6 +43,7 @@ const SystemConfigComponent = () => {
                 systemNameZh: config.systemNameZh,
                 icpCode: config.icpCode,
                 defaultView: config.defaultView ?? true, // 默认为 grid 视图
+                backgroundOverlayOpacity: config.backgroundOverlayOpacity ?? 65,
                 customCSS: config.customCSS,
                 customJS: config.customJS,
             });
@@ -102,6 +103,7 @@ const SystemConfigComponent = () => {
                 systemNameZh: values.systemNameZh,
                 logoBase64: logoPreview,
                 backgroundBase64: backgroundPreview,
+                backgroundOverlayOpacity: values.backgroundOverlayOpacity ?? 65,
                 icpCode: values.icpCode || '',
                 defaultView: values.defaultView ?? true,
                 customCSS: values.customCSS || '',
@@ -120,6 +122,7 @@ const SystemConfigComponent = () => {
                 systemNameZh: config.systemNameZh,
                 icpCode: config.icpCode,
                 defaultView: config.defaultView ?? true,
+                backgroundOverlayOpacity: config.backgroundOverlayOpacity ?? 65,
                 customCSS: config.customCSS,
                 customJS: config.customJS,
             });
@@ -287,6 +290,15 @@ const SystemConfigComponent = () => {
                                 </Space>
                                 <span className="text-xs text-slate-500">公开页面会以铺满方式显示图片。</span>
                             </Space>
+                        </Form.Item>
+
+                        <Form.Item
+                            label="背景遮罩透明度"
+                            name="backgroundOverlayOpacity"
+                            tooltip="数值越低，背景图片越明亮；数值越高，文字和数据越清晰。"
+                            extra="建议在 45%–65% 之间调整，以兼顾图片效果与数据可读性。"
+                        >
+                            <Slider min={10} max={90} step={5} marks={{ 10: '亮', 65: '推荐', 90: '暗' }} tooltip={{ formatter: (value) => `${value ?? 65}%` }} />
                         </Form.Item>
                     </Card>
 

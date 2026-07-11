@@ -29,6 +29,7 @@ window.SystemConfig = {
     SystemNameEn: "[[.SystemNameEn]]",
     ICPCode: "[[.ICPCode]]",
     DefaultView: "[[.DefaultView]]",
+    BackgroundOverlayOpacity: [[if .BackgroundOverlayOpacity]][[.BackgroundOverlayOpacity]][[else]]65[[end]],
     Version: "[[.Version]]",
 };
 </script>
@@ -40,13 +41,14 @@ window.SystemConfig = {
 
 	provider := testSystemConfigProvider{
 		config: &models.SystemConfig{
-			SystemNameZh: "皮卡监控",
-			SystemNameEn: "Pika Monitor",
-			ICPCode:      "ICP-1",
-			DefaultView:  "grid",
-			CustomJS:     `console.log("pika");`,
-			CustomCSS:    `body { color: red; }`,
-			Version:      "v1.2.3",
+			SystemNameZh:             "皮卡监控",
+			SystemNameEn:             "Pika Monitor",
+			ICPCode:                  "ICP-1",
+			DefaultView:              "grid",
+			BackgroundOverlayOpacity: 65,
+			CustomJS:                 `console.log("pika");`,
+			CustomCSS:                `body { color: red; }`,
+			Version:                  "v1.2.3",
 		},
 	}
 	if err := RenderUIFilesInDir(dir, provider); err != nil {
@@ -62,6 +64,7 @@ window.SystemConfig = {
 		"<title>皮卡监控 | Pika Monitor</title>",
 		`SystemNameZh: "皮卡监控"`,
 		`Version: "v1.2.3"`,
+		`BackgroundOverlayOpacity: 65`,
 		`console.log("pika");`,
 		`body { color: red; }`,
 	} {
