@@ -54,8 +54,8 @@ window.SystemConfig = {
 			DefaultView:              "grid",
 			BackgroundOverlayOpacity: testIntPtr(65),
 			ChromeBlur:               testIntPtr(24),
-			NavigationEnabled:         true,
-			NavigationSheetURL:        "https://docs.google.com/spreadsheets/d/example/edit",
+			NavigationEnabled:        true,
+			NavigationSheetURL:       "https://docs.google.com/spreadsheets/d/example/edit",
 			CustomJS:                 `console.log("pika");`,
 			CustomCSS:                `body { color: red; }`,
 			Version:                  "v1.2.3",
@@ -87,5 +87,29 @@ window.SystemConfig = {
 	}
 	if _, err := os.Stat(filepath.Join(dir, "index.html.tmpl")); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestEnsureIndexTemplateRefreshesAfterViteBuild(t *testing.T) {
+	dir := t.TempDir()
+	indexPath := filepath.Join(dir, "index.html")
+	tmplPath := filepath.Join(dir, "index.html.tmpl")
+	if err := os.WriteFile(tmplPath, []byte(`<script src="/assets/old.js"></script>`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	newBuild := `<script>window.SystemConfig = "[[.SystemNameEn]]"</script><script src="/assets/new.js"></script>`
+	if err := os.WriteFile(indexPath, []byte(newBuild), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ensureIndexTemplate(dir); err != nil {
+		t.Fatal(err)
+	}
+	updatedTemplate, err := os.ReadFile(tmplPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(updatedTemplate) != newBuild {
+		t.Fatalf("index template was not refreshed after build: %s", updatedTemplate)
 	}
 }

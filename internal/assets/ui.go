@@ -33,15 +33,20 @@ func RenderUIFilesInDir(dir string, provider SystemConfigProvider) error {
 
 func ensureIndexTemplate(dir string) error {
 	tmplPath := filepath.Join(dir, "index.html.tmpl")
-	if _, err := os.Stat(tmplPath); err == nil {
-		return nil
-	} else if !os.IsNotExist(err) {
-		return err
-	}
-
 	indexPath := filepath.Join(dir, "index.html")
 	src, err := os.ReadFile(indexPath)
 	if err != nil {
+		return err
+	}
+
+	if _, err := os.Stat(tmplPath); err == nil {
+		// Vite 每次构建都会重新生成带 [[...]] 标记的 index.html。
+		// 已渲染的运行时文件没有这些标记，不能反向覆盖模板；只有检测到新构建
+		// 的模板时才更新，避免重启后继续引用旧的带 hash 静态资源。
+		if !strings.Contains(string(src), "[[.") {
+			return nil
+		}
+	} else if !os.IsNotExist(err) {
 		return err
 	}
 

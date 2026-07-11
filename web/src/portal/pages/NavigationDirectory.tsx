@@ -144,7 +144,7 @@ const NavigationDirectory = () => {
                                         href={item.url}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="group relative flex min-h-[104px] items-start gap-3 overflow-hidden rounded-xl border border-slate-200 bg-white/75 p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/60 hover:shadow-lg hover:shadow-cyan-500/10 dark:border-cyan-300/25 dark:bg-[#071827]/70 dark:hover:border-cyan-200/65"
+                                        className="navigation-link-card group relative flex min-h-[104px] items-start gap-3 overflow-hidden rounded-xl border border-slate-200 p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/60 hover:shadow-lg hover:shadow-cyan-500/10 dark:border-cyan-300/25 dark:hover:border-cyan-200/65"
                                     >
                                         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/0 to-transparent transition group-hover:via-cyan-400/70"/>
                                         <SiteIcon item={item}/>
