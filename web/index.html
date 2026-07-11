@@ -12,8 +12,10 @@
             SystemNameEn: "[[.SystemNameEn]]",
             ICPCode: "[[.ICPCode]]",
             DefaultView: "[[.DefaultView]]",
-            BackgroundOverlayOpacity: [[if .BackgroundOverlayOpacity]][[.BackgroundOverlayOpacity]][[else]]65[[end]],
-            ChromeBlur: [[if .ChromeBlur]][[.ChromeBlur]][[else]]24[[end]],
+            BackgroundOverlayOpacity: Number("[[if .BackgroundOverlayOpacity]][[.BackgroundOverlayOpacity]][[else]]65[[end]]"),
+            ChromeBlur: Number("[[if .ChromeBlur]][[.ChromeBlur]][[else]]24[[end]]"),
+            NavigationEnabled: "[[.NavigationEnabled]]" === "true",
+            NavigationSheetURL: "[[.NavigationSheetURL]]",
             Version: "[[.Version]]",
         };
     </script>

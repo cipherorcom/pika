@@ -18,6 +18,7 @@ const ServerListPage = lazy(() => import('@portal/pages/ServerList.tsx'));
 const ServerDetailPage = lazy(() => import('@portal/pages/ServerDetail.tsx'));
 const PublicMonitorListPage = lazy(() => import('@portal/pages/MonitorList.tsx'));
 const PublicMonitorDetailPage = lazy(() => import('@portal/pages/MonitorDetail.tsx'));
+const NavigationDirectoryPage = lazy(() => import('@portal/pages/NavigationDirectory.tsx'));
 const MonitorListPage = lazy(() => import('@admin/pages/Monitors/MonitorList'));
 const DDNSPage = lazy(() => import('@admin/pages/DDNS'));
 const AlertRecordListPage = lazy(() => import('@admin/pages/AlertRecords'));
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
             {
                 path: '/monitors/:id',
                 element: lazyLoad(PublicMonitorDetailPage),
+            },
+            {
+                path: '/navigation',
+                element: lazyLoad(NavigationDirectoryPage),
             },
         ],
     },

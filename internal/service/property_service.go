@@ -354,6 +354,8 @@ func (s *PropertyService) InitializeDefaultConfigs(ctx context.Context) error {
 				LogoBase64:               assets.DefaultLogoBase64(),
 				BackgroundOverlayOpacity: intPtr(65),
 				ChromeBlur:               intPtr(24),
+				NavigationEnabled:        false,
+				NavigationSheetURL:       "",
 				ICPCode:                  "",
 				DefaultView:              "grid",
 			},

@@ -201,6 +201,7 @@ func setupApi(app *orz.App, components *AppComponents) error {
 		// Logo（公开访问）- 用于公共页面只获取 Logo
 		publicApiWithOptionalAuth.GET("/logo", components.PropertyHandler.GetLogo)
 		publicApiWithOptionalAuth.GET("/background", components.PropertyHandler.GetBackground)
+		publicApiWithOptionalAuth.GET("/navigation", components.PropertyHandler.GetNavigation)
 	}
 
 	// WebSocket 路由（探针连接）

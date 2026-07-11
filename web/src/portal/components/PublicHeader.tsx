@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Activity, LogIn, Menu, Moon, ServerIcon, Settings, Sun, X} from 'lucide-react';
+import {Activity, Compass, LogIn, Menu, Moon, ServerIcon, Settings, Sun, X} from 'lucide-react';
 import {Link, useLocation} from "react-router-dom";
 import {useTheme} from '../contexts/ThemeContext';
 import {getCurrentUser} from "@/api/auth.ts";
@@ -51,6 +51,8 @@ const PublicHeader = () => {
 
     if (currentPath.startsWith('/monitors')) {
         activeTab = 'monitors';
+    } else if (currentPath.startsWith('/navigation')) {
+        activeTab = 'navigation';
     }
 
     let systemName = window.SystemConfig?.SystemNameEn;
@@ -71,6 +73,12 @@ const PublicHeader = () => {
             rightName = systemName.substring(mid);
         }
     }
+
+    const publicTabs = [
+        {id: 'servers', icon: ServerIcon, label: '设备监控', to: '/'},
+        {id: 'monitors', icon: Activity, label: '服务监控', to: '/monitors'},
+        ...(window.SystemConfig?.NavigationEnabled ? [{id: 'navigation', icon: Compass, label: '导航站', to: '/navigation'}] : []),
+    ];
 
     return (
         <>
@@ -108,10 +116,7 @@ const PublicHeader = () => {
 
                         {/* HUD Navigation - Desktop Only */}
                         <div className="hidden md:flex items-center gap-8">
-                            {[
-                                {id: 'servers', icon: ServerIcon, label: '设备监控', to: '/'},
-                                {id: 'monitors', icon: Activity, label: '服务监控', to: '/monitors'}
-                            ].map(tab => (
+                            {publicTabs.map(tab => (
                                 <Link to={tab.to} key={tab.id}>
                                     <button
                                         className={`
@@ -199,10 +204,7 @@ const PublicHeader = () => {
                     className="md:hidden fixed inset-0 top-20 bg-white/95 dark:bg-[#05050a]/95 backdrop-blur-xl z-30 animate-in slide-in-from-top">
                     <div className="flex flex-col p-4 gap-4">
                         {/* Mobile Navigation */}
-                        {[
-                            {id: 'servers', icon: ServerIcon, label: '设备监控', to: '/'},
-                            {id: 'monitors', icon: Activity, label: '服务监控', to: '/monitors'}
-                        ].map(tab => (
+                        {publicTabs.map(tab => (
                             <Link
                                 to={tab.to}
                                 key={tab.id}

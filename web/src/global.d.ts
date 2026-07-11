@@ -9,6 +9,8 @@ declare global {
             DefaultView: string;
             BackgroundOverlayOpacity: number;
             ChromeBlur: number;
+            NavigationEnabled: boolean;
+            NavigationSheetURL: string;
             Version: string;
         };
     }
