@@ -8,6 +8,7 @@ declare global {
             ICPCode: string;
             DefaultView: string;
             BackgroundOverlayOpacity: number;
+            ChromeBlur: number;
             Version: string;
         };
     }

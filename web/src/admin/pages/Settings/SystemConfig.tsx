@@ -44,6 +44,7 @@ const SystemConfigComponent = () => {
                 icpCode: config.icpCode,
                 defaultView: config.defaultView ?? true, // 默认为 grid 视图
                 backgroundOverlayOpacity: config.backgroundOverlayOpacity ?? 65,
+                chromeBlur: config.chromeBlur ?? 24,
                 customCSS: config.customCSS,
                 customJS: config.customJS,
             });
@@ -104,6 +105,7 @@ const SystemConfigComponent = () => {
                 logoBase64: logoPreview,
                 backgroundBase64: backgroundPreview,
                 backgroundOverlayOpacity: values.backgroundOverlayOpacity ?? 65,
+                chromeBlur: values.chromeBlur ?? 24,
                 icpCode: values.icpCode || '',
                 defaultView: values.defaultView ?? true,
                 customCSS: values.customCSS || '',
@@ -123,6 +125,7 @@ const SystemConfigComponent = () => {
                 icpCode: config.icpCode,
                 defaultView: config.defaultView ?? true,
                 backgroundOverlayOpacity: config.backgroundOverlayOpacity ?? 65,
+                chromeBlur: config.chromeBlur ?? 24,
                 customCSS: config.customCSS,
                 customJS: config.customJS,
             });
@@ -295,10 +298,19 @@ const SystemConfigComponent = () => {
                         <Form.Item
                             label="背景遮罩透明度"
                             name="backgroundOverlayOpacity"
-                            tooltip="数值越低，背景图片越明亮；数值越高，文字和数据越清晰。"
-                            extra="建议在 45%–65% 之间调整，以兼顾图片效果与数据可读性。"
+                            tooltip="数值越低，背景图片、顶部导航和底部页脚越明亮；数值越高，文字和数据越清晰。"
+                            extra="该设置会同时应用于页面背景、顶部导航和底部页脚；0% 为完全透明。"
                         >
-                            <Slider min={10} max={90} step={5} marks={{ 10: '亮', 65: '推荐', 90: '暗' }} tooltip={{ formatter: (value) => `${value ?? 65}%` }} />
+                            <Slider min={0} max={100} step={5} marks={{ 0: '透明', 65: '推荐', 100: '不透明' }} tooltip={{ formatter: (value) => `${value ?? 65}%` }} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="导航与页脚模糊度"
+                            name="chromeBlur"
+                            tooltip="控制顶部导航和底部页脚的毛玻璃模糊效果。"
+                            extra="0px 为不模糊，24px 为较强毛玻璃效果。"
+                        >
+                            <Slider min={0} max={24} step={1} marks={{ 0: '无', 12: '适中', 24: '强' }} tooltip={{ formatter: (value) => `${value ?? 24}px` }} />
                         </Form.Item>
                     </Card>
 

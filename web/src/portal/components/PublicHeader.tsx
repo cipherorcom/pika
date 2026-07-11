@@ -9,6 +9,9 @@ const PublicHeader = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const {appliedTheme, setTheme} = useTheme();
+    const backgroundOverlayOpacity = Math.min(100, Math.max(0, window.SystemConfig?.BackgroundOverlayOpacity ?? 65));
+    const chromeBlur = Math.min(24, Math.max(0, window.SystemConfig?.ChromeBlur ?? 24));
+    const chromeOpacity = backgroundOverlayOpacity / 100;
     let location = useLocation();
 
 
@@ -72,7 +75,12 @@ const PublicHeader = () => {
     return (
         <>
             <header
-                className="fixed left-0 right-0 top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-teal-100/15 dark:bg-[#020917]/86">
+                className="fixed left-0 right-0 top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-teal-100/15 dark:bg-[#020917]/86"
+                style={{
+                    backgroundColor: appliedTheme === 'dark' ? `rgb(2 9 23 / ${chromeOpacity})` : `rgb(255 255 255 / ${chromeOpacity})`,
+                    backdropFilter: `blur(${chromeBlur}px)`,
+                }}
+            >
                 <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-8">
                         <Link to={'/'}>

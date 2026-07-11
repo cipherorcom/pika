@@ -57,7 +57,8 @@ type SystemConfig struct {
 	SystemNameEn             string `json:"systemNameEn"`             // 系统名称（英文）
 	LogoBase64               string `json:"logoBase64"`               // 系统logo（base64编码）
 	BackgroundBase64         string `json:"backgroundBase64"`         // 公共页面背景图（base64编码）
-	BackgroundOverlayOpacity int    `json:"backgroundOverlayOpacity"` // 公共页面背景遮罩透明度（10-90）
+	BackgroundOverlayOpacity *int   `json:"backgroundOverlayOpacity"` // 公共页面背景遮罩透明度（0-100）
+	ChromeBlur               *int   `json:"chromeBlur"`               // 公共页面导航和页脚模糊度（0-24）
 	ICPCode                  string `json:"icpCode"`                  // ICP备案号
 	DefaultView              string `json:"defaultView"`              // 默认视图 grid | list
 	CustomCSS                string `json:"customCSS"`                // 自定义 CSS

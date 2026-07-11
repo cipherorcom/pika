@@ -245,6 +245,7 @@ func (s *MonitorService) buildMonitorOverview(monitor models.MonitorTask, stats 
 		Description:      monitor.Description,
 		Enabled:          monitor.Enabled,
 		Interval:         monitor.Interval,
+		AgentIds:         monitor.AgentIds,
 		AgentCount:       stats.AgentCount,
 		Status:           stats.Status,
 		ResponseTime:     stats.ResponseTime,

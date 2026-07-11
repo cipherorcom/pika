@@ -340,9 +340,16 @@ const MonitorChartImpl = ({agentId, timeRange, start, end, isLive}: MonitorChart
         setLegendCollapsed(!legendCollapsed);
     };
 
-    // 如果没有数据且不是加载中，不渲染组件
+    // 即使暂时没有历史点也保留图表区域，避免服务监控页缺少趋势图。
     if (!isLoading && chartData.length === 0) {
-        return null;
+        return (
+            <ChartContainer title="服务响应时间趋势" icon={Activity}>
+                <ChartPlaceholder
+                    title="暂无服务监控历史数据"
+                    subtitle="等待至少两次服务检测上报后即可绘制响应时间趋势"
+                />
+            </ChartContainer>
+        );
     }
 
     // 渲染

@@ -12,6 +12,7 @@ window.SystemConfig ??= {
     ICPCode: '',
     DefaultView: 'grid',
     BackgroundOverlayOpacity: 65,
+    ChromeBlur: 24,
     Version: '',
 };
 

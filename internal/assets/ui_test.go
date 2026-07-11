@@ -14,6 +14,10 @@ type testSystemConfigProvider struct {
 	config *models.SystemConfig
 }
 
+func testIntPtr(value int) *int {
+	return &value
+}
+
 func (p testSystemConfigProvider) GetSystemConfig(context.Context) (*models.SystemConfig, error) {
 	return p.config, nil
 }
@@ -30,6 +34,7 @@ window.SystemConfig = {
     ICPCode: "[[.ICPCode]]",
     DefaultView: "[[.DefaultView]]",
     BackgroundOverlayOpacity: [[if .BackgroundOverlayOpacity]][[.BackgroundOverlayOpacity]][[else]]65[[end]],
+    ChromeBlur: [[if .ChromeBlur]][[.ChromeBlur]][[else]]24[[end]],
     Version: "[[.Version]]",
 };
 </script>
@@ -45,7 +50,8 @@ window.SystemConfig = {
 			SystemNameEn:             "Pika Monitor",
 			ICPCode:                  "ICP-1",
 			DefaultView:              "grid",
-			BackgroundOverlayOpacity: 65,
+			BackgroundOverlayOpacity: testIntPtr(65),
+			ChromeBlur:               testIntPtr(24),
 			CustomJS:                 `console.log("pika");`,
 			CustomCSS:                `body { color: red; }`,
 			Version:                  "v1.2.3",
@@ -65,6 +71,7 @@ window.SystemConfig = {
 		`SystemNameZh: "皮卡监控"`,
 		`Version: "v1.2.3"`,
 		`BackgroundOverlayOpacity: 65`,
+		`ChromeBlur: 24`,
 		`console.log("pika");`,
 		`body { color: red; }`,
 	} {

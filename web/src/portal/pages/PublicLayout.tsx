@@ -5,7 +5,7 @@ import PublicFooter from '@portal/components/PublicFooter';
 
 const PublicLayout = () => {
     const [hasCustomBackground, setHasCustomBackground] = useState(true);
-    const overlayOpacity = Math.min(90, Math.max(10, window.SystemConfig?.BackgroundOverlayOpacity || 65));
+    const overlayOpacity = Math.min(100, Math.max(0, window.SystemConfig?.BackgroundOverlayOpacity ?? 65));
     return (
         <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-slate-100 text-slate-800 transition-colors duration-500 dark:bg-[#020713] dark:text-slate-100">
             {/* 公开面板的视觉底图：内容区保留足够暗度，确保实时数据始终清晰可读。 */}

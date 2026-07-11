@@ -1,5 +1,7 @@
 import {useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
+import {Activity, BarChart3, CircleCheck, CircleX} from 'lucide-react';
+import {useQuery} from '@tanstack/react-query';
 import {Card} from '@portal/components/Card.tsx';
 import {EmptyState} from '@portal/components/EmptyState.tsx';
 import {LoadingSpinner} from '@portal/components/LoadingSpinner.tsx';
@@ -20,6 +22,8 @@ import {NetworkConnectionChart} from '@portal/components/server/NetworkConnectio
 import {TemperatureChart} from '@portal/components/server/TemperatureChart.tsx';
 import {useAgentQuery, useLatestMetricsQuery} from '@portal/hooks/server.ts';
 import {LIVE_RANGE, SERVER_TIME_RANGE_OPTIONS} from '@portal/constants/time.ts';
+import {getPublicMonitors} from '@/api/monitor.ts';
+import type {PublicMonitor} from '@/types';
 
 /**
  * 服务器详情页面
@@ -30,6 +34,7 @@ const ServerDetail = () => {
     const navigate = useNavigate();
     const [timeRange, setTimeRange] = useState<string>(LIVE_RANGE);
     const [customRange, setCustomRange] = useState<{ start: number; end: number } | null>(null);
+    const [metricTab, setMetricTab] = useState<'history' | 'monitor'>('history');
 
     const handleCustomRangeApply = (range: { start: number; end: number }) => {
         setCustomRange(range);
@@ -43,9 +48,20 @@ const ServerDetail = () => {
     // 实时模式 1s 拉取最新指标，其余 5s
     const {data: agentResponse, isLoading} = useAgentQuery(id);
     const {data: latestMetricsResponse} = useLatestMetricsQuery(id, isLive ? 1000 : 5000);
+    const {data: publicMonitors = []} = useQuery<PublicMonitor[]>({
+        queryKey: ['publicMonitors'],
+        queryFn: async () => (await getPublicMonitors()).data || [],
+        staleTime: 30000,
+    });
 
     const agent = agentResponse?.data;
     const latestMetrics = latestMetricsResponse?.data || null;
+    const hostMonitors = latestMetrics?.monitors || [];
+    const monitorNames = new Map(publicMonitors.map((monitor) => [monitor.id, monitor.name]));
+    const latestMonitorByID = new Map(hostMonitors.map((monitor) => [monitor.monitorId, monitor]));
+    const configuredHostMonitors = publicMonitors.filter((monitor) =>
+        monitor.enabled && (!monitor.agentIds?.length || monitor.agentIds.includes(id!)),
+    );
     const formatLoad = (value?: number) => (
         typeof value === 'number' && Number.isFinite(value) ? value.toFixed(2) : '-'
     );
@@ -89,11 +105,46 @@ const ServerDetail = () => {
                     {/* 系统信息 */}
                     <SystemInfoSection agent={agent} latestMetrics={latestMetrics}/>
 
-                    {/* 历史趋势图表 */}
+                    {/* 趋势模块的外层导航 */}
+                    <div className="flex items-center justify-center" role="tablist" aria-label="主机指标">
+                        <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-1 dark:bg-black/30">
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={metricTab === 'history'}
+                                onClick={() => setMetricTab('history')}
+                                className={`flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors ${
+                                    metricTab === 'history'
+                                        ? 'bg-white text-slate-900 shadow-sm dark:bg-cyan-500/20 dark:text-cyan-100 dark:ring-1 dark:ring-cyan-400/30'
+                                        : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-cyan-200'
+                                }`}
+                            >
+                                <BarChart3 className="h-4 w-4"/>
+                                历史趋势
+                            </button>
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={metricTab === 'monitor'}
+                                onClick={() => setMetricTab('monitor')}
+                                className={`flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors ${
+                                    metricTab === 'monitor'
+                                        ? 'bg-white text-slate-900 shadow-sm dark:bg-cyan-500/20 dark:text-cyan-100 dark:ring-1 dark:ring-cyan-400/30'
+                                        : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-cyan-200'
+                                }`}
+                            >
+                                <Activity className="h-4 w-4"/>
+                                服务监控
+                            </button>
+                        </div>
+                    </div>
+
                     <Card
-                        title="历史趋势"
-                        description="针对选定时间范围展示 CPU、内存与网络的变化趋势"
-                        action={
+                        title={metricTab === 'history' ? '历史趋势' : '服务监控'}
+                        description={metricTab === 'history'
+                            ? '针对选定时间范围展示 CPU、内存与网络的变化趋势'
+                            : '展示由此主机执行的服务监控响应时间'}
+                        action={(
                             <div className="flex flex-wrap items-center gap-2">
                                 <TimeRangeSelector
                                     value={timeRange}
@@ -104,9 +155,9 @@ const ServerDetail = () => {
                                     onCustomRangeApply={handleCustomRangeApply}
                                 />
                             </div>
-                        }
+                        )}
                     >
-                        <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+                        {metricTab === 'history' ? <div className="space-y-4 sm:space-y-5 lg:space-y-6" role="tabpanel">
                             {/* 核心指标：大屏 2 列，小屏 1 列 */}
                             <div className="grid gap-4 sm:gap-5 lg:gap-6 grid-cols-1 md:grid-cols-2">
                                 <CpuChart agentId={id!} timeRange={timeRange} start={customStart} end={customEnd}
@@ -138,12 +189,46 @@ const ServerDetail = () => {
                                                   end={customEnd} isLive={isLive}/>
                             </div>
 
-                            {/* 监控指标：单列全宽 */}
-                            <div className="grid gap-4 sm:gap-5 lg:gap-6 grid-cols-1">
+                        </div> : (
+                            <div className="space-y-5" role="tabpanel">
+                                {configuredHostMonitors.length > 0 ? (
+                                    <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50/70 dark:border-cyan-900/50 dark:bg-black/20">
+                                        <div className="grid grid-cols-1 lg:grid-cols-[220px_repeat(auto-fit,minmax(190px,1fr))]">
+                                            <div className="border-b border-slate-200 p-4 dark:border-cyan-900/50 lg:border-b-0 lg:border-r">
+                                                <p className="truncate text-base font-semibold text-slate-900 dark:text-white">{agent.name}</p>
+                                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{configuredHostMonitors.length} 个监控服务</p>
+                                            </div>
+                                        {configuredHostMonitors.map((configuredMonitor) => {
+                                            const monitor = latestMonitorByID.get(configuredMonitor.id);
+                                            const isUp = monitor?.status === 'up';
+                                            const hasReported = !!monitor;
+                                            return (
+                                                <div key={configuredMonitor.id} className="border-b border-slate-200 p-4 dark:border-cyan-900/50 lg:border-b-0 lg:border-r last:border-0">
+                                                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">{monitor?.monitorName || monitorNames.get(configuredMonitor.id) || configuredMonitor.name}</p>
+                                                    <p className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">
+                                                        {hasReported ? monitor.responseTime : '-'}{hasReported && <span className="ml-1 text-sm font-medium">ms</span>}
+                                                    </p>
+                                                    <p className={`mt-1 inline-flex items-center gap-1 text-xs font-medium ${!hasReported ? 'text-slate-500 dark:text-slate-400' : isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                                                        {!hasReported ? <Activity className="h-3.5 w-3.5"/> : isUp ? <CircleCheck className="h-3.5 w-3.5"/> : <CircleX className="h-3.5 w-3.5"/>}
+                                                        {!hasReported ? '等待检测' : isUp ? '正常' : '异常'}
+                                                    </p>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    </div>
+                                ) : (
+                                    <div className="rounded-lg border border-dashed border-slate-300 py-10 text-center dark:border-cyan-900/60">
+                                        <Activity className="mx-auto h-8 w-8 text-slate-400 dark:text-cyan-700"/>
+                                        <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">该主机暂未执行服务监控</p>
+                                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">请在服务监控中将监控任务分配给此主机。</p>
+                                    </div>
+                                )}
+
                                 <MonitorChart agentId={id!} timeRange={timeRange} start={customStart} end={customEnd}
                                               isLive={isLive}/>
                             </div>
-                        </div>
+                        )}
                     </Card>
 
                     {/* 网络连接统计 */}

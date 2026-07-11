@@ -47,6 +47,10 @@ var defaultPublicIPv6APIs = []string{
 	"https://v6.yinghualuo.cn/bejson",
 }
 
+func intPtr(value int) *int {
+	return &value
+}
+
 type PropertyService struct {
 	repo   *repo.PropertyRepo
 	logger *zap.Logger
@@ -348,7 +352,8 @@ func (s *PropertyService) InitializeDefaultConfigs(ctx context.Context) error {
 				SystemNameZh:             "皮卡监控",
 				SystemNameEn:             "Pika Monitor",
 				LogoBase64:               assets.DefaultLogoBase64(),
-				BackgroundOverlayOpacity: 65,
+				BackgroundOverlayOpacity: intPtr(65),
+				ChromeBlur:               intPtr(24),
 				ICPCode:                  "",
 				DefaultView:              "grid",
 			},

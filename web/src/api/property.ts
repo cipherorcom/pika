@@ -86,7 +86,8 @@ export interface SystemConfig {
     systemNameZh: string;  // 中文名称
     logoBase64: string;    // Logo 的 base64 编码
     backgroundBase64: string; // 公共页面背景图的 base64 编码
-    backgroundOverlayOpacity: number; // 公共页面背景遮罩透明度（10-90）
+    backgroundOverlayOpacity: number | null; // 公共页面背景遮罩透明度（0-100）
+    chromeBlur: number | null; // 公共页面导航和页脚模糊度（0-24）
     icpCode: string;       // ICP 备案号
     defaultView: string;   // 默认视图 grid,list
     customCSS: string;     // 自定义 CSS

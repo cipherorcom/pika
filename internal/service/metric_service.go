@@ -347,7 +347,22 @@ func (s *MetricService) HandleMetricData(ctx context.Context, agentID string, me
 			monitorDataList[i].AgentId = agentID // 关联探针ID
 		}
 		latestMetrics.Update(func(lm *metric.LatestMetrics) {
-			lm.Monitors = monitorDataList
+			// 服务监控任务由调度器逐个下发，不能用本次结果覆盖此前任务的最新状态。
+			// 按 monitorId 合并，保留同一主机上所有服务的最近一次检测结果。
+			merged := append([]protocol.MonitorData(nil), lm.Monitors...)
+			indexes := make(map[string]int, len(merged))
+			for i, monitor := range merged {
+				indexes[monitor.MonitorId] = i
+			}
+			for _, monitor := range monitorDataList {
+				if index, exists := indexes[monitor.MonitorId]; exists {
+					merged[index] = monitor
+					continue
+				}
+				indexes[monitor.MonitorId] = len(merged)
+				merged = append(merged, monitor)
+			}
+			lm.Monitors = merged
 		})
 		for _, monitorData := range monitorDataList {
 			s.updateMonitorCache(agentID, &monitorData, timestamp)

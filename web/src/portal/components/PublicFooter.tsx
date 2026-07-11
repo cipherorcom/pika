@@ -1,11 +1,22 @@
 import {Heart, Github} from 'lucide-react';
+import {useTheme} from '../contexts/ThemeContext';
 
 const PublicFooter = () => {
     const currentYear = new Date().getFullYear();
     const icpCode = window.SystemConfig?.ICPCode || '';
+    const {appliedTheme} = useTheme();
+    const backgroundOverlayOpacity = Math.min(100, Math.max(0, window.SystemConfig?.BackgroundOverlayOpacity ?? 65));
+    const chromeBlur = Math.min(24, Math.max(0, window.SystemConfig?.ChromeBlur ?? 24));
+    const chromeOpacity = backgroundOverlayOpacity / 100;
 
     return (
-        <footer className="border-t border-slate-200 dark:border-cyan-900/50 bg-[#f0f2f5] dark:bg-[#05050a] transition-colors duration-300">
+        <footer
+            className="border-t border-slate-200 bg-[#f0f2f5] backdrop-blur-xl transition-colors duration-300 dark:border-cyan-900/50 dark:bg-[#05050a]"
+            style={{
+                backgroundColor: appliedTheme === 'dark' ? `rgb(5 5 10 / ${chromeOpacity})` : `rgb(240 242 245 / ${chromeOpacity})`,
+                backdropFilter: `blur(${chromeBlur}px)`,
+            }}
+        >
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="py-6">
                     <div className="flex flex-col items-center justify-between gap-4 text-xs text-slate-500 dark:text-cyan-500 sm:flex-row font-mono">
