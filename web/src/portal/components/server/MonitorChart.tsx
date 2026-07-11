@@ -87,20 +87,14 @@ const getMaxDataPoints = (timeRange: string): number => {
 };
 
 /**
- * 生成不重复的颜色
- * 使用 HSL 色轮均匀分布，支持无限数量的监控项
+ * 优先使用暗色界面下对比度稳定的调色板；超出后再补充 HSL 颜色。
  */
 const generateColors = (count: number): string[] => {
-    const colors: string[] = [];
-    const hueStep = 360 / count; // 色相间隔
-    
-    for (let i = 0; i < count; i++) {
-        const hue = (i * hueStep) % 360;
-        const saturation = 65 + (i % 3) * 10; // 65%, 75%, 85% 循环
-        const lightness = 45 + (i % 2) * 10;  // 45%, 55% 循环
-        colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+    const palette = ['#38bdf8', '#f59e0b', '#a78bfa', '#34d399', '#fb7185', '#facc15', '#22d3ee', '#f97316'];
+    const colors = palette.slice(0, count);
+    for (let i = colors.length; i < count; i++) {
+        colors.push(`hsl(${(i * 137.5) % 360}, 72%, 62%)`);
     }
-    
     return colors;
 };
 
@@ -159,6 +153,7 @@ const MonitorChartImpl = ({agentId, timeRange, start, end, isLive}: MonitorChart
     const isMobile = useIsMobile();
     const rangeMs = start !== undefined && end !== undefined ? end - start : undefined;
     const [selectedMonitors, setSelectedMonitors] = useState<Set<string>>(new Set());
+    const [hasManualSelection, setHasManualSelection] = useState(false);
     const [legendCollapsed, setLegendCollapsed] = useState(true); // 移动端默认收起
     // 监控任务由探针自定义周期上报，实时模式下保留 15m 视图，10s 重查
     const effectiveRange = isLive ? '15m' : timeRange;
@@ -179,12 +174,12 @@ const MonitorChartImpl = ({agentId, timeRange, start, end, isLive}: MonitorChart
         return series.map(s => s.labels?.monitor_name || s.labels?.monitor_id || s.name);
     }, [metricsResponse]);
 
-    // 初始化选中所有监控任务
+    // 默认始终选中全部服务；用户手动筛选后才保留其选择。
     useEffect(() => {
-        if (allMonitorKeys.length > 0 && selectedMonitors.size === 0) {
+        if (allMonitorKeys.length > 0 && !hasManualSelection) {
             setSelectedMonitors(new Set(allMonitorKeys));
         }
-    }, [allMonitorKeys, selectedMonitors.size]);
+    }, [allMonitorKeys, hasManualSelection]);
 
     // 过滤后的监控任务列表
     const monitorKeys = useMemo(() => {
@@ -212,17 +207,19 @@ const MonitorChartImpl = ({agentId, timeRange, start, end, isLive}: MonitorChart
 
         if (seriesDataArray.length === 0) return [];
 
-        // 取所有监控任务时间范围的交集，确保每个时间点所有任务都有数据
-        let minTime = -Infinity, maxTime = Infinity;
+        // 使用所有服务的时间并集。不同服务开始检测的时间可能不同，不能因没有共同区间而隐藏曲线。
+        let minTime = Infinity, maxTime = -Infinity;
         seriesDataArray.forEach(s => {
             if (s.data.length > 0) {
-                minTime = Math.max(minTime, s.data[0].timestamp);
-                maxTime = Math.min(maxTime, s.data[s.data.length - 1].timestamp);
+                minTime = Math.min(minTime, s.data[0].timestamp);
+                maxTime = Math.max(maxTime, s.data[s.data.length - 1].timestamp);
             }
         });
 
-        // 如果没有交集，返回空数组
-        if (minTime >= maxTime) return [];
+        if (!Number.isFinite(minTime) || !Number.isFinite(maxTime)) return [];
+        if (minTime === maxTime) {
+            return seriesDataArray.map((series) => ({timestamp: series.data[0].timestamp, [series.key]: series.data[0].value}));
+        }
 
         // 均匀生成目标时间点
         const maxPoints = getMaxDataPoints(timeRange);
@@ -286,6 +283,7 @@ const MonitorChartImpl = ({agentId, timeRange, start, end, isLive}: MonitorChart
         if (!data || !data.dataKey) return;
         
         const monitorKey = data.dataKey;
+        setHasManualSelection(true);
         const newSelected = new Set(selectedMonitors);
         
         // 判断是否是全选状态
@@ -308,6 +306,7 @@ const MonitorChartImpl = ({agentId, timeRange, start, end, isLive}: MonitorChart
     // 点击图例切换选中状态
     const handleLegendClick = (data: any) => {
         const monitorKey = data.value;
+        setHasManualSelection(true);
         const newSelected = new Set(selectedMonitors);
         
         // 判断是否是全选状态
@@ -329,6 +328,7 @@ const MonitorChartImpl = ({agentId, timeRange, start, end, isLive}: MonitorChart
 
     // 恢复全选
     const handleSelectAll = () => {
+        setHasManualSelection(true);
         setSelectedMonitors(new Set(allMonitorKeys));
     };
 
