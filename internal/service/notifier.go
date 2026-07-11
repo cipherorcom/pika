@@ -565,6 +565,52 @@ func (n *Notifier) sendTelegram(ctx context.Context, botToken, chatID, message s
 	return nil
 }
 
+// sendWxPusher 发送 WxPusher 通知。
+// WxPusher 支持同时指定 UID 与主题 ID；至少需要提供其中一项。
+func (n *Notifier) sendWxPusher(ctx context.Context, appToken string, uids []string, topicIDs []int, message string) error {
+	if appToken == "" {
+		return fmt.Errorf("WxPusher 配置缺少 appToken")
+	}
+	if len(uids) == 0 && len(topicIDs) == 0 {
+		return fmt.Errorf("WxPusher 至少需要配置一个 UID 或主题 ID")
+	}
+
+	body := map[string]interface{}{
+		"appToken":    appToken,
+		"content":     message,
+		"summary":     "Pika 告警通知",
+		"contentType": 1,
+	}
+	if len(uids) > 0 {
+		body["uids"] = uids
+	}
+	if len(topicIDs) > 0 {
+		body["topicIds"] = topicIDs
+	}
+
+	response, err := n.sendJSONRequest(ctx, "https://wxpusher.zjiecode.com/api/send/message", body)
+	if err != nil {
+		return err
+	}
+
+	var result struct {
+		Code    int    `json:"code"`
+		Msg     string `json:"msg"`
+		Success bool   `json:"success"`
+	}
+	if err := json.Unmarshal(response, &result); err != nil {
+		return fmt.Errorf("解析 WxPusher 响应失败: %w", err)
+	}
+	if result.Code != 1000 || !result.Success {
+		if result.Msg == "" {
+			result.Msg = "未知错误"
+		}
+		return fmt.Errorf("WxPusher 发送失败: %s", result.Msg)
+	}
+
+	return nil
+}
+
 // sendEmail 发送邮件通知
 func (n *Notifier) sendEmail(ctx context.Context, smtpHost string, smtpPort int, fromEmail, password, toEmail, subject, message string) error {
 	m := gomail.NewMessage()
@@ -935,6 +981,69 @@ func (n *Notifier) sendTelegramByConfig(ctx context.Context, config map[string]i
 	return n.sendTelegram(ctx, botToken, chatID, message)
 }
 
+// sendWxPusherByConfig 根据配置发送 WxPusher 通知。
+func (n *Notifier) sendWxPusherByConfig(ctx context.Context, config map[string]interface{}, message string) error {
+	appToken, ok := config["appToken"].(string)
+	if !ok || appToken == "" {
+		return fmt.Errorf("WxPusher 配置缺少 appToken")
+	}
+
+	return n.sendWxPusher(ctx, appToken, stringSlice(config["uids"]), intSlice(config["topicIds"]), message)
+}
+
+func stringSlice(value interface{}) []string {
+	switch values := value.(type) {
+	case []string:
+		result := make([]string, 0, len(values))
+		for _, item := range values {
+			if item = strings.TrimSpace(item); item != "" {
+				result = append(result, item)
+			}
+		}
+		return result
+	case []interface{}:
+		result := make([]string, 0, len(values))
+		for _, value := range values {
+			if item, ok := value.(string); ok && strings.TrimSpace(item) != "" {
+				result = append(result, strings.TrimSpace(item))
+			}
+		}
+		return result
+	default:
+		return nil
+	}
+}
+
+func intSlice(value interface{}) []int {
+	switch values := value.(type) {
+	case []int:
+		result := make([]int, 0, len(values))
+		for _, item := range values {
+			if item > 0 {
+				result = append(result, item)
+			}
+		}
+		return result
+	case []interface{}:
+		result := make([]int, 0, len(values))
+		for _, value := range values {
+			switch item := value.(type) {
+			case float64:
+				if item > 0 && item == float64(int(item)) {
+					result = append(result, int(item))
+				}
+			case int:
+				if item > 0 {
+					result = append(result, item)
+				}
+			}
+		}
+		return result
+	default:
+		return nil
+	}
+}
+
 // sendEmailByConfig 根据配置发送邮件通知
 func (n *Notifier) sendEmailByConfig(ctx context.Context, config map[string]interface{}, message string) error {
 	smtpHost, ok := config["smtpHost"].(string)
@@ -1010,6 +1119,8 @@ func (n *Notifier) SendNotificationByConfig(ctx context.Context, channelConfig *
 		return n.sendFeishuByConfig(ctx, channelConfig.Config, message)
 	case "telegram":
 		return n.sendTelegramByConfig(ctx, channelConfig.Config, message)
+	case "wxpusher":
+		return n.sendWxPusherByConfig(ctx, channelConfig.Config, message)
 	case "email":
 		return n.sendEmailByConfig(ctx, channelConfig.Config, message)
 	case "webhook":
@@ -1072,6 +1183,8 @@ func (n *Notifier) sendToChannel(ctx context.Context, channelConfig *models.Noti
 		return n.sendFeishuByConfig(channelCtx, channelConfig.Config, message)
 	case "telegram":
 		return n.sendTelegramByConfig(channelCtx, channelConfig.Config, message)
+	case "wxpusher":
+		return n.sendWxPusherByConfig(channelCtx, channelConfig.Config, message)
 	case "email":
 		return n.sendEmailByConfig(channelCtx, channelConfig.Config, message)
 	case "webhook":
@@ -1104,6 +1217,11 @@ func (n *Notifier) SendFeishuByConfig(ctx context.Context, config map[string]int
 // SendTelegramByConfig 导出方法供外部调用
 func (n *Notifier) SendTelegramByConfig(ctx context.Context, config map[string]interface{}, message string) error {
 	return n.sendTelegramByConfig(ctx, config, message)
+}
+
+// SendWxPusherByConfig 导出方法供外部调用。
+func (n *Notifier) SendWxPusherByConfig(ctx context.Context, config map[string]interface{}, message string) error {
+	return n.sendWxPusherByConfig(ctx, config, message)
 }
 
 // SendEmailByConfig 导出方法供外部调用
@@ -1145,6 +1263,8 @@ func (n *Notifier) SendTestNotification(ctx context.Context, channelType string,
 		return n.sendFeishuByConfig(ctx, config, message)
 	case "telegram":
 		return n.sendTelegramByConfig(ctx, config, message)
+	case "wxpusher":
+		return n.sendWxPusherByConfig(ctx, config, message)
 	case "email":
 		return n.sendEmailByConfig(ctx, config, message)
 	case "webhook":

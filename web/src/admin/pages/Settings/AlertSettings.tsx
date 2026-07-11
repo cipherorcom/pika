@@ -89,57 +89,10 @@ const AlertSettings = () => {
 
                     {/*<Divider orientation="left">告警规则</Divider>*/}
 
-                    {[
-                        { key: 'cpu', title: 'CPU 告警规则', thresholdLabel: 'CPU 使用率阈值 (%)', max: 100 },
-                        { key: 'memory', title: '内存告警规则', thresholdLabel: '内存使用率阈值 (%)', max: 100 },
-                        { key: 'disk', title: '磁盘告警规则', thresholdLabel: '磁盘使用率阈值 (%)', max: 100 },
-                        { key: 'network', title: '网速告警规则', thresholdLabel: '网速阈值 (MB/s)', max: 10000 },
-                    ].map((rule) => (
-                        <Card key={rule.key} title={rule.title} type="inner">
-                            <Form.Item noStyle shouldUpdate>
-                                {({ getFieldValue }) => {
-                                    const enabled = getFieldValue(['rules', `${rule.key}Enabled`]);
-                                    return (
-                                        <div className="flex items-center gap-8">
-                                            <Form.Item
-                                                label="开关"
-                                                name={['rules', `${rule.key}Enabled`]}
-                                                valuePropName="checked"
-                                                className="mb-0"
-                                            >
-                                                <Switch />
-                                            </Form.Item>
-                                            <Form.Item
-                                                label={rule.thresholdLabel}
-                                                name={['rules', `${rule.key}Threshold`]}
-                                                className="mb-0"
-                                            >
-                                                <InputNumber
-                                                    min={0}
-                                                    max={rule.max}
-                                                    style={{ width: '100%' }}
-                                                    disabled={!enabled}
-                                                />
-                                            </Form.Item>
-                                            <Form.Item
-                                                label="持续时间（秒）"
-                                                name={['rules', `${rule.key}Duration`]}
-                                                className="mb-0"
-                                            >
-                                                <InputNumber min={1} max={3600} style={{ width: '100%' }}
-                                                    disabled={!enabled} />
-                                            </Form.Item>
-                                        </div>
-                                    );
-                                }}
-                            </Form.Item>
-                        </Card>
-                    ))}
-
                     <Card
                         title="主机规则组"
                         type="inner"
-                        extra="同一规则组内的主机共享 CPU、内存、磁盘和网速告警阈值；未分组主机使用上方默认规则。"
+                        extra="同一规则组内的主机共享 CPU、内存、磁盘和网速告警阈值；未分组主机使用下方默认规则。"
                     >
                         <Form.List name="ruleGroups">
                             {(fields, { add, remove }) => (
@@ -194,6 +147,53 @@ const AlertSettings = () => {
                             )}
                         </Form.List>
                     </Card>
+
+                    {[
+                        { key: 'cpu', title: 'CPU 告警规则', thresholdLabel: 'CPU 使用率阈值 (%)', max: 100 },
+                        { key: 'memory', title: '内存告警规则', thresholdLabel: '内存使用率阈值 (%)', max: 100 },
+                        { key: 'disk', title: '磁盘告警规则', thresholdLabel: '磁盘使用率阈值 (%)', max: 100 },
+                        { key: 'network', title: '网速告警规则', thresholdLabel: '网速阈值 (MB/s)', max: 10000 },
+                    ].map((rule) => (
+                        <Card key={rule.key} title={rule.title} type="inner">
+                            <Form.Item noStyle shouldUpdate>
+                                {({ getFieldValue }) => {
+                                    const enabled = getFieldValue(['rules', `${rule.key}Enabled`]);
+                                    return (
+                                        <div className="flex items-center gap-8">
+                                            <Form.Item
+                                                label="开关"
+                                                name={['rules', `${rule.key}Enabled`]}
+                                                valuePropName="checked"
+                                                className="mb-0"
+                                            >
+                                                <Switch />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label={rule.thresholdLabel}
+                                                name={['rules', `${rule.key}Threshold`]}
+                                                className="mb-0"
+                                            >
+                                                <InputNumber
+                                                    min={0}
+                                                    max={rule.max}
+                                                    style={{ width: '100%' }}
+                                                    disabled={!enabled}
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="持续时间（秒）"
+                                                name={['rules', `${rule.key}Duration`]}
+                                                className="mb-0"
+                                            >
+                                                <InputNumber min={1} max={3600} style={{ width: '100%' }}
+                                                    disabled={!enabled} />
+                                            </Form.Item>
+                                        </div>
+                                    );
+                                }}
+                            </Form.Item>
+                        </Card>
+                    ))}
 
                     <Card title="HTTPS 证书告警规则" type="inner">
                         <Form.Item noStyle shouldUpdate>

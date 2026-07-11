@@ -54,7 +54,7 @@ const PROPERTY_ID_NOTIFICATION_CHANNELS = 'notification_channels';
 
 // 通知渠道配置（通过 type 标识，不再使用独立ID）
 export interface NotificationChannel {
-    type: 'dingtalk' | 'wecom' | 'wecomApp' | 'feishu' | 'email' | 'webhook' | 'telegram'; // 渠道类型，作为唯一标识
+    type: 'dingtalk' | 'wecom' | 'wecomApp' | 'feishu' | 'email' | 'webhook' | 'telegram' | 'wxpusher'; // 渠道类型，作为唯一标识
     enabled: boolean; // 是否启用
     config: Record<string, any>; // JSON配置，根据type不同而不同
 }
@@ -70,9 +70,9 @@ export const saveNotificationChannels = async (channels: NotificationChannel[]):
     return saveProperty(PROPERTY_ID_NOTIFICATION_CHANNELS, '通知渠道配置', channels);
 };
 
-// 测试通知渠道（从数据库读取配置）
-export const testNotificationChannel = async (type: string): Promise<{ message: string }> => {
-    const response = await post<{ message: string }>(`/admin/notification-channels/${type}/test`);
+// 测试通知渠道（使用当前表单的临时配置，不保存）
+export const testNotificationChannel = async (type: string, config: Record<string, any>): Promise<{ message: string }> => {
+    const response = await post<{ message: string }>(`/admin/notification-channels/${type}/test`, {config});
     return response.data;
 };
 

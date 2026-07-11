@@ -197,41 +197,42 @@ func (h *PropertyHandler) sendBase64Image(c echo.Context, imageBase64, imageName
 	return c.Blob(http.StatusOK, contentType, imageData)
 }
 
-// TestNotificationChannel 测试通知渠道（从数据库读取配置）
+// TestNotificationChannel 测试通知渠道。传入 config 时仅使用本次请求的临时配置，不写入数据库。
 func (h *PropertyHandler) TestNotificationChannel(c echo.Context) error {
 	channelType := c.Param("type")
 	if channelType == "" {
 		return orz.NewError(400, "缺少渠道类型参数")
 	}
 
-	ctx := c.Request().Context()
-
-	channels, err := h.service.GetNotificationChannelConfigs(c.Request().Context())
-	if err != nil {
-		h.logger.Error("获取通知渠道配置失败", zap.Error(err))
-		return orz.NewError(500, "获取通知渠道配置失败")
+	var req struct {
+		Config map[string]interface{} `json:"config"`
+	}
+	if err := c.Bind(&req); err != nil {
+		return orz.NewError(400, "测试配置格式无效")
 	}
 
-	// 查找指定类型的渠道
-	var targetChannel *models.NotificationChannelConfig
-	for i := range channels {
-		if channels[i].Type == channelType {
-			targetChannel = &channels[i]
-			break
+	config := req.Config
+	if config == nil {
+		channels, err := h.service.GetNotificationChannelConfigs(c.Request().Context())
+		if err != nil {
+			h.logger.Error("获取通知渠道配置失败", zap.Error(err))
+			return orz.NewError(500, "获取通知渠道配置失败")
+		}
+		for _, channel := range channels {
+			if channel.Type == channelType {
+				config = channel.Config
+				break
+			}
+		}
+		if config == nil {
+			return orz.NewError(404, "通知渠道不存在，请先配置")
 		}
 	}
 
-	if targetChannel == nil {
-		return orz.NewError(404, "通知渠道不存在，请先配置")
-	}
-
-	if !targetChannel.Enabled {
-		return orz.NewError(400, "通知渠道未启用")
-	}
-
 	// 发送测试消息（动态匹配通知渠道类型）
+	ctx := c.Request().Context()
 	message := "这是一条测试通知消息"
-	sendErr := h.notifier.SendTestNotification(ctx, targetChannel.Type, targetChannel.Config, message)
+	sendErr := h.notifier.SendTestNotification(ctx, channelType, config, message)
 
 	if sendErr != nil {
 		h.logger.Error("发送测试通知失败", zap.String("type", channelType), zap.Error(sendErr))

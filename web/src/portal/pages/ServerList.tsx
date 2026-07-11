@@ -72,13 +72,20 @@ const ServerListRow = ({server}: {server: AgentWithMetrics}) => {
     const trafficText = traffic?.enabled && traffic.limit > 0
         ? `${formatBytes(traffic.used, 1)} / ${formatBytes(traffic.limit, 1)}`
         : '—';
+    const daysUntilExpiry = server.expireTime && server.expireTime > 0
+        ? Math.ceil((server.expireTime - Date.now()) / (24 * 60 * 60 * 1000))
+        : null;
 
     return (
         <Link to={`/servers/${server.id.substring(0, 8)}`} aria-label={`查看探针 ${server.name || server.hostname} 的详情`} className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300">
             <article className="grid gap-3 rounded-xl border border-slate-200 bg-white/74 p-3.5 backdrop-blur-md transition hover:border-teal-300 hover:shadow-lg dark:border-white/15 dark:bg-[#061a2c]/70 dark:hover:border-teal-200/45 sm:grid-cols-[minmax(190px,1.3fr)_repeat(3,minmax(72px,.55fr))_minmax(105px,.8fr)_minmax(64px,.45fr)_minmax(130px,.85fr)_minmax(125px,.8fr)] sm:items-center">
                 <div className="min-w-0">
                     <div className="flex items-center gap-2"><span className={cn('h-2 w-2 rounded-full', isOnline ? 'bg-emerald-400' : 'bg-rose-400')}/><h3 className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{server.name || server.hostname}</h3><span className={cn('rounded px-1.5 py-0.5 text-[10px]', isOnline ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/10 text-rose-700 dark:text-rose-300')}>{isOnline ? '在线' : '离线'}</span></div>
-                    <p className="mt-1 truncate text-[10px] text-slate-500 dark:text-slate-400">{server.os || '未知系统'} · {server.arch || '—'}</p>
+                    <div className="mt-1 flex items-center gap-1.5 overflow-hidden text-[10px] text-slate-500 dark:text-slate-400">
+                        <span className="shrink-0 whitespace-nowrap">{server.os || '未知系统'} · {server.arch || '—'}</span>
+                        {daysUntilExpiry !== null && <span className={cn('shrink-0 whitespace-nowrap rounded px-1 py-px font-medium', daysUntilExpiry <= 0 ? 'bg-rose-500/10 text-rose-600 dark:text-rose-300' : daysUntilExpiry <= 30 ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300' : 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300')}>{Math.max(daysUntilExpiry, 0)} 天</span>}
+                        {server.tags?.map(tag => <span key={tag} className="shrink-0 whitespace-nowrap rounded bg-cyan-500/10 px-1 py-px text-cyan-700 dark:text-cyan-300">{tag}</span>)}
+                    </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-mono tabular-nums sm:contents">
                     <div><p className="text-slate-500 dark:text-slate-400 sm:hidden">CPU</p><p className="mt-1 font-semibold text-slate-800 dark:text-slate-100 sm:mt-0">{cpu.toFixed(1)}%</p></div>

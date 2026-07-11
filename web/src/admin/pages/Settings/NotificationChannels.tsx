@@ -11,6 +11,14 @@ import {
 import {getErrorMessage} from '@/lib/utils';
 import NotificationCustomHelp from "@admin/pages/Settings/NotificationCustomHelp.tsx";
 
+const splitNotificationTargets = (value?: string): string[] =>
+    (value || '').split(/[，,\n\s]+/).map(item => item.trim()).filter(Boolean);
+
+const parseTopicIDs = (value?: string): number[] =>
+    splitNotificationTargets(value)
+        .map(item => Number(item))
+        .filter(item => Number.isInteger(item) && item > 0);
+
 const NotificationChannels = () => {
     const [form] = Form.useForm();
     const {message: messageApi} = App.useApp();
@@ -31,6 +39,7 @@ const NotificationChannels = () => {
     const wecomAppEnabled = Form.useWatch('wecomAppEnabled', form);
     const feishuEnabled = Form.useWatch('feishuEnabled', form);
     const telegramEnabled = Form.useWatch('telegramEnabled', form);
+    const wxpusherEnabled = Form.useWatch('wxpusherEnabled', form);
     const emailEnabled = Form.useWatch('emailEnabled', form);
     const webhookEnabled = Form.useWatch('webhookEnabled', form);
 
@@ -54,7 +63,7 @@ const NotificationChannels = () => {
 
     // 测试 mutation
     const testMutation = useMutation({
-        mutationFn: testNotificationChannel,
+        mutationFn: ({type, config}: {type: string; config: Record<string, any>}) => testNotificationChannel(type, config),
         onSuccess: () => {
             messageApi.success('测试通知已发送');
         },
@@ -91,6 +100,11 @@ const NotificationChannels = () => {
                     formValues.telegramEnabled = channel.enabled;
                     formValues.telegramBotToken = channel.config?.botToken || '';
                     formValues.telegramChatID = channel.config?.chatID || '';
+                } else if (channel.type === 'wxpusher') {
+                    formValues.wxpusherEnabled = channel.enabled;
+                    formValues.wxpusherAppToken = channel.config?.appToken || '';
+                    formValues.wxpusherUids = Array.isArray(channel.config?.uids) ? channel.config.uids.join(', ') : '';
+                    formValues.wxpusherTopicIds = Array.isArray(channel.config?.topicIds) ? channel.config.topicIds.join(', ') : '';
                 } else if (channel.type === 'email') {
                     formValues.emailEnabled = channel.enabled;
                     formValues.emailSmtpHost = channel.config?.smtpHost || '';
@@ -188,6 +202,19 @@ const NotificationChannels = () => {
                 });
             }
 
+            // WxPusher
+            if (values.wxpusherEnabled || values.wxpusherAppToken) {
+                newChannels.push({
+                    type: 'wxpusher',
+                    enabled: values.wxpusherEnabled || false,
+                    config: {
+                        appToken: values.wxpusherAppToken || '',
+                        uids: splitNotificationTargets(values.wxpusherUids),
+                        topicIds: parseTopicIDs(values.wxpusherTopicIds),
+                    },
+                });
+            }
+
             // 邮件
             if (values.emailEnabled || values.emailSmtpHost) {
                 newChannels.push({
@@ -234,8 +261,32 @@ const NotificationChannels = () => {
         }
     };
 
-    const handleTest = (type: string) => {
-        testMutation.mutate(type);
+    const handleTest = async (type: string) => {
+        try {
+            const values = await form.validateFields();
+            const configs: Record<string, Record<string, any>> = {
+                dingtalk: {secretKey: values.dingtalkSecretKey || '', signSecret: values.dingtalkSignSecret || ''},
+                wecom: {secretKey: values.wecomSecretKey || ''},
+                wecomApp: {origin: values.wecomAppOrigin || 'https://qyapi.weixin.qq.com', corpId: values.wecomAppCorpId || '', corpSecret: values.wecomAppCorpSecret || '', agentId: values.wecomAppAgentId, toUser: values.wecomAppToUser || '@all'},
+                feishu: {secretKey: values.feishuSecretKey || '', signSecret: values.feishuSignSecret || ''},
+                telegram: {botToken: values.telegramBotToken || '', chatID: values.telegramChatID || ''},
+                wxpusher: {
+                    appToken: values.wxpusherAppToken || '',
+                    uids: splitNotificationTargets(values.wxpusherUids),
+                    topicIds: parseTopicIDs(values.wxpusherTopicIds),
+                },
+                email: {smtpHost: values.emailSmtpHost || '', smtpPort: values.emailSmtpPort || 587, fromEmail: values.emailFromEmail || '', password: values.emailPassword || '', toEmail: values.emailToEmail || '', subject: values.emailSubject || 'Pika 告警通知'},
+                webhook: {
+                    url: values.webhookUrl || '',
+                    method: values.webhookMethod || 'POST',
+                    customBody: values.webhookCustomBody || '',
+                    headers: Object.fromEntries((values.webhookHeaders || []).filter((item: {key: string; value: string}) => item.key && item.value).map((item: {key: string; value: string}) => [item.key, item.value])),
+                },
+            };
+            testMutation.mutate({type, config: configs[type]});
+        } catch {
+            // 表单校验失败时不发送测试请求
+        }
     };
 
     if (isLoading) {
@@ -251,11 +302,97 @@ const NotificationChannels = () => {
             <div className="mb-4">
                 <h2 className="text-xl font-bold">通知渠道管理</h2>
                 <p className="text-gray-500 my-2">配置钉钉、企业微信、飞书和自定义Webhook通知渠道</p>
-                <Alert title="更改配置后，请点击下方的保存后再进行测试。" type="info" showIcon/>
+                <Alert title="测试会直接使用当前表单内容发送，不会保存或修改已生效配置。" type="info" showIcon/>
             </div>
 
             <Form form={form} layout="vertical" onFinish={handleSave}>
                 <Space orientation={'vertical'} className={'w-full'}>
+                    {/* WxPusher 通知 */}
+                    <Card
+                        title={
+                            <div className={'flex items-center gap-2'}>
+                                <div>WxPusher 通知</div>
+                                <div className={'text-xs font-normal'}>
+                                    了解更多：<a href="https://wxpusher.zjiecode.com/docs/"
+                                                target="_blank"
+                                                rel="noopener noreferrer">WxPusher 开发文档</a>
+                                </div>
+                            </div>
+                        }
+                        type="inner"
+                        className="mb-4"
+                        extra={
+                            <Button
+                                type="link"
+                                size="small"
+                                icon={<TestTube size={14}/>}
+                                onClick={() => handleTest('wxpusher')}
+                                loading={testMutation.isPending}
+                                disabled={!wxpusherEnabled}
+                            >
+                                测试
+                            </Button>
+                        }
+                    >
+                        <Form.Item label="启用 WxPusher 通知" name="wxpusherEnabled" valuePropName="checked">
+                            <Switch/>
+                        </Form.Item>
+
+                        <Form.Item
+                            noStyle
+                            shouldUpdate={(prevValues, currentValues) =>
+                                prevValues.wxpusherEnabled !== currentValues.wxpusherEnabled
+                            }
+                        >
+                            {({getFieldValue}) =>
+                                getFieldValue('wxpusherEnabled') ? (
+                                    <>
+                                        <Form.Item
+                                            label="App Token"
+                                            name="wxpusherAppToken"
+                                            rules={[{required: true, message: '请输入 WxPusher App Token'}]}
+                                            tooltip="在 WxPusher 应用后台获取；该 Token 可发送消息，请妥善保管"
+                                        >
+                                            <Input.Password placeholder="AT_xxxxxxxxxxxxxxxx"/>
+                                        </Form.Item>
+                                        <Form.Item
+                                            label="UID 列表"
+                                            name="wxpusherUids"
+                                            tooltip="多个 UID 用英文逗号、中文逗号或换行分隔；仅填主题 ID 时可留空"
+                                        >
+                                            <Input.TextArea rows={2} placeholder="UID_xxx, UID_yyy"/>
+                                        </Form.Item>
+                                        <Form.Item
+                                            label="主题 ID（可选）"
+                                            name="wxpusherTopicIds"
+                                            dependencies={['wxpusherUids']}
+                                            rules={[{
+                                                validator: (_, value?: string) => {
+                                                    const entries = splitNotificationTargets(value);
+                                                    if (entries.length !== parseTopicIDs(value).length) {
+                                                        return Promise.reject(new Error('主题 ID 必须为正整数，多个 ID 请用逗号分隔'));
+                                                    }
+                                                    if (splitNotificationTargets(form.getFieldValue('wxpusherUids')).length === 0 && entries.length === 0) {
+                                                        return Promise.reject(new Error('请至少填写一个 UID 或主题 ID'));
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            }]}
+                                            tooltip="用于向订阅该主题的用户群发；可与 UID 同时填写，多个 ID 用逗号分隔"
+                                        >
+                                            <Input placeholder="例如：123, 456" inputMode="numeric"/>
+                                        </Form.Item>
+                                        <Alert
+                                            type="info"
+                                            showIcon
+                                            message="请至少填写一个 UID 或主题 ID；“测试”使用当前填写内容，不需要先保存。"
+                                        />
+                                    </>
+                                ) : null
+                            }
+                        </Form.Item>
+                    </Card>
+
                     {/* 钉钉通知 */}
                     <Card
                         title={

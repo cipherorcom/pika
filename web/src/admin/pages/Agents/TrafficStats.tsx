@@ -33,6 +33,9 @@ const TrafficStats: React.FC<TrafficStatsProps> = ({agentId}) => {
     const [form] = Form.useForm();
     const queryClient = useQueryClient();
     const [enabled, setEnabled] = useState(false);
+    const [trafficUnit, setTrafficUnit] = useState<'GB' | 'TB'>('GB');
+
+    const unitBytes = (unit: 'GB' | 'TB') => unit === 'TB' ? 1024 * 1024 * 1024 * 1024 : 1024 * 1024 * 1024;
 
     // 获取流量统计
     const {data: stats, isLoading} = useQuery<TrafficStatsType>({
@@ -61,7 +64,7 @@ const TrafficStats: React.FC<TrafficStatsProps> = ({agentId}) => {
         try {
             const values = enabled ? await form.validateFields() : form.getFieldsValue();
             const limitValue = typeof values.trafficLimit === 'number' ? values.trafficLimit : 0;
-            const limitBytes = enabled ? limitValue * 1024 * 1024 * 1024 : 0;
+            const limitBytes = enabled ? limitValue * unitBytes(trafficUnit) : 0;
             saveMutation.mutate({
                 enabled: enabled,
                 type: values.trafficType || 'recv',
@@ -106,10 +109,11 @@ const TrafficStats: React.FC<TrafficStatsProps> = ({agentId}) => {
             setEnabled(stats.enabled);
             form.setFieldsValue({
                 trafficType: stats.type || 'recv',
-                trafficLimit: stats.limit > 0 ? stats.limit / (1024 * 1024 * 1024) : 0,
+                trafficLimit: stats.limit > 0 ? stats.limit / unitBytes(stats.limit >= unitBytes('TB') ? 'TB' : 'GB') : 0,
                 trafficUsed: stats.used > 0 ? stats.used / (1024 * 1024 * 1024) : 0,
                 trafficResetDay: stats.resetDay || 0,
             });
+            setTrafficUnit(stats.limit >= unitBytes('TB') ? 'TB' : 'GB');
         } else {
             setEnabled(false);
             form.setFieldsValue({
@@ -120,6 +124,13 @@ const TrafficStats: React.FC<TrafficStatsProps> = ({agentId}) => {
             });
         }
     }, [stats, form]);
+
+    const handleTrafficUnitChange = (nextUnit: 'GB' | 'TB') => {
+        const currentLimit = form.getFieldValue('trafficLimit') || 0;
+        const bytes = Number(currentLimit) * unitBytes(trafficUnit);
+        form.setFieldValue('trafficLimit', bytes / unitBytes(nextUnit));
+        setTrafficUnit(nextUnit);
+    };
 
     // 计算流量使用百分比
     const usagePercent = stats && stats.limit > 0
@@ -211,15 +222,15 @@ const TrafficStats: React.FC<TrafficStatsProps> = ({agentId}) => {
                                         rules={[
                                             {type: 'number', min: 0, message: '流量限额不能小于0'},
                                         ]}
-                                        extra="设置流量限额(GB)，0表示仅统计不告警"
+                                        extra="设置流量限额，0表示仅统计不告警"
                                     >
                                         <InputNumber
                                             min={0}
-                                            step={1}
-                                            precision={0}
-                                            placeholder="请输入流量限额(GB)"
+                                            step={trafficUnit === 'TB' ? 0.1 : 1}
+                                            precision={trafficUnit === 'TB' ? 2 : 0}
+                                            placeholder={`请输入流量限额(${trafficUnit})`}
                                             style={{width: '100%'}}
-                                            addonAfter="GB"
+                                            addonAfter={<Select value={trafficUnit} onChange={handleTrafficUnitChange} options={[{label: 'GB', value: 'GB'}, {label: 'TB', value: 'TB'}]} style={{width: 72}} variant="borderless" />}
                                         />
                                     </Form.Item>
 

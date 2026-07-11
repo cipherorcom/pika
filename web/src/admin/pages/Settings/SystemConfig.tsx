@@ -370,23 +370,42 @@ const SystemConfigComponent = () => {
                                     }
                                 }
 
+                                const overlayOpacity = Math.min(100, Math.max(0, getFieldValue('backgroundOverlayOpacity') ?? 65));
+                                const chromeBlur = Math.min(24, Math.max(0, getFieldValue('chromeBlur') ?? 24));
+                                const chromeStyle = {
+                                    backgroundColor: `rgb(2 9 23 / ${overlayOpacity / 100})`,
+                                    backdropFilter: `blur(${chromeBlur}px)`,
+                                };
+
                                 return (
-                                    <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                                        <img
-                                            src={getLogoUrl()}
-                                            alt="Logo 预览"
-                                            className="h-8 w-8 sm:h-9 sm:w-9 object-contain rounded-md"
-                                            onError={(e) => {
-                                                e.currentTarget.src = '/logo.png';
-                                            }}
+                                    <div className="relative min-h-[280px] overflow-hidden rounded-xl border border-slate-200 bg-slate-950 shadow-sm dark:border-cyan-900/70">
+                                        <div
+                                            className="absolute inset-0 bg-cover bg-center"
+                                            style={backgroundPreview ? { backgroundImage: `url(${backgroundPreview})` } : { backgroundImage: 'radial-gradient(circle at 20% 0%, #164e63 0%, #0f172a 48%, #020617 100%)' }}
                                         />
-                                        <div>
-                                            <h1 className="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 dark:from-cyan-400 dark:via-blue-400 dark:to-purple-400 uppercase italic">
-                                                {leftName}<span className="text-slate-800 dark:text-white">{rightName}</span>
-                                            </h1>
-                                            <p className="text-xs text-slate-500 dark:text-cyan-500 font-mono tracking-[0.3em] uppercase">
-                                                {systemNameZh}
-                                            </p>
+                                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,9,23,.82),rgba(2,8,19,1))]" style={{ opacity: overlayOpacity / 100 }} />
+
+                                        <div className="relative flex min-h-[280px] flex-col">
+                                            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3" style={chromeStyle}>
+                                                <div className="flex items-center gap-2.5">
+                                                    <img src={getLogoUrl()} alt="Logo 预览" className="h-8 w-8 rounded-md object-contain" onError={(e) => { e.currentTarget.src = '/logo.png'; }} />
+                                                    <div>
+                                                        <h1 className="text-base font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-300 to-teal-200 uppercase italic">{leftName}<span className="text-white">{rightName}</span></h1>
+                                                        <p className="text-[9px] font-mono tracking-[0.25em] text-cyan-200/80 uppercase">{systemNameZh}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-[10px] font-medium text-cyan-100/90"><span className="rounded bg-cyan-400/15 px-2 py-1">设备监控</span><span className="text-white/60">服务监控</span></div>
+                                            </div>
+
+                                            <div className="flex-1 p-4">
+                                                <p className="text-xs font-semibold text-white">概览</p>
+                                                <p className="mt-1 text-[10px] text-cyan-100/75">公开页面背景与组件效果预览</p>
+                                                <div className="mt-3 grid grid-cols-3 gap-2">
+                                                    {['在线服务器', 'CPU 使用率', '实时网络'].map((item, index) => <div key={item} className="rounded-lg border border-white/15 bg-slate-950/55 p-2 backdrop-blur-sm"><p className="text-[9px] text-cyan-100/65">{item}</p><p className="mt-1 text-sm font-semibold text-white">{index === 0 ? '12' : index === 1 ? '28%' : '1.2 MB/s'}</p></div>)}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-[9px] text-cyan-100/70" style={chromeStyle}><span>© {new Date().getFullYear()} {systemNameEn || 'Pika Monitor'}</span><span>用 ♥ 构建</span></div>
                                         </div>
                                     </div>
                                 );
