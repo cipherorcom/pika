@@ -159,11 +159,18 @@ export interface AlertNotifications {
     tamperEventEnabled: boolean;     // 防篡改事件通知
 }
 
+export interface AlertRuleGroup {
+    name: string;
+    agentIds: string[];
+    rules: AlertRules;
+}
+
 // 全局告警配置
 export interface AlertConfig {
     enabled: boolean;  // 全局告警开关
     maskIP: boolean;   // 是否在通知中打码 IP 地址
     rules: AlertRules;
+    ruleGroups?: AlertRuleGroup[];
     notifications: AlertNotifications;
 }
 

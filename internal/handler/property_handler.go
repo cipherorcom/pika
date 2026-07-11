@@ -85,6 +85,27 @@ func (h *PropertyHandler) SetProperty(c echo.Context) error {
 		}
 	}
 
+	// 告警规则组校验：同一主机只能属于一个规则组，避免阈值覆盖冲突。
+	if id == service.PropertyIDAlertConfig {
+		raw, err := json.Marshal(req.Value)
+		if err != nil {
+			return orz.NewError(400, "告警配置格式无效")
+		}
+		var alertConfig models.AlertConfig
+		if err := json.Unmarshal(raw, &alertConfig); err != nil {
+			return orz.NewError(400, "告警配置格式无效")
+		}
+		assignedAgents := make(map[string]string)
+		for _, group := range alertConfig.RuleGroups {
+			for _, agentID := range group.AgentIDs {
+				if previousGroup, exists := assignedAgents[agentID]; exists {
+					return orz.NewError(400, "主机不能同时属于多个规则组："+previousGroup+"、"+group.Name)
+				}
+				assignedAgents[agentID] = group.Name
+			}
+		}
+	}
+
 	if err := h.service.Set(c.Request().Context(), id, req.Name, req.Value); err != nil {
 		h.logger.Error("设置属性失败", zap.String("id", id), zap.Error(err))
 		return orz.NewError(500, "设置属性失败")

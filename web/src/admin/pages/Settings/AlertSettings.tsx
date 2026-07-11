@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { App, Button, Card, Form, InputNumber, Space, Switch } from 'antd';
+import { App, Button, Card, Form, Input, InputNumber, Select, Space, Switch } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AlertConfig } from '@/api/property';
 import { getAlertConfig, saveAlertConfig } from '@/api/property';
+import { listAgentsByAdmin } from '@/api/agent';
 import { getErrorMessage } from '@/lib/utils';
 
 const AlertSettings = () => {
@@ -14,6 +15,10 @@ const AlertSettings = () => {
     const { data: configData, isLoading: configLoading } = useQuery({
         queryKey: ['alertConfig'],
         queryFn: getAlertConfig,
+    });
+    const { data: agents = [] } = useQuery({
+        queryKey: ['adminAgents'],
+        queryFn: async () => (await listAgentsByAdmin()).data || [],
     });
 
     // 设置表单默认值
@@ -130,6 +135,65 @@ const AlertSettings = () => {
                             </Form.Item>
                         </Card>
                     ))}
+
+                    <Card
+                        title="主机规则组"
+                        type="inner"
+                        extra="同一规则组内的主机共享 CPU、内存、磁盘和网速告警阈值；未分组主机使用上方默认规则。"
+                    >
+                        <Form.List name="ruleGroups">
+                            {(fields, { add, remove }) => (
+                                <Space direction="vertical" className="w-full" size="middle">
+                                    {fields.map((field, index) => (
+                                        <Card
+                                            key={field.key}
+                                            size="small"
+                                            title={`规则组 ${index + 1}`}
+                                            extra={<Button danger type="text" onClick={() => remove(field.name)}>移除</Button>}
+                                        >
+                                            <div className="grid gap-4 lg:grid-cols-2">
+                                                <Form.Item label="规则组名称" name={[field.name, 'name']} rules={[{ required: true, message: '请输入规则组名称' }]}>
+                                                    <Input placeholder="例如：生产主机" />
+                                                </Form.Item>
+                                                <Form.Item label="应用主机" name={[field.name, 'agentIds']} rules={[{ required: true, message: '请选择至少一台主机' }]}>
+                                                    <Select
+                                                        mode="multiple"
+                                                        placeholder="选择共用此规则的主机"
+                                                        options={agents.map((agent: any) => ({ value: agent.id, label: `${agent.name} (${agent.id.slice(0, 8)})` }))}
+                                                    />
+                                                </Form.Item>
+                                            </div>
+                                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                                                {[
+                                                    { key: 'cpu', label: 'CPU', unit: '%', max: 100 },
+                                                    { key: 'memory', label: '内存', unit: '%', max: 100 },
+                                                    { key: 'disk', label: '磁盘', unit: '%', max: 100 },
+                                                    { key: 'network', label: '网速', unit: 'MB/s', max: 10000 },
+                                                ].map((rule) => (
+                                                    <div key={rule.key} className="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+                                                        <Form.Item name={[field.name, 'rules', `${rule.key}Enabled`]} valuePropName="checked" className="mb-3" label={`${rule.label} 告警`}>
+                                                            <Switch />
+                                                        </Form.Item>
+                                                        <Form.Item name={[field.name, 'rules', `${rule.key}Threshold`]} label={`阈值 (${rule.unit})`} className="mb-3">
+                                                            <InputNumber min={0} max={rule.max} className="w-full" />
+                                                        </Form.Item>
+                                                        <Form.Item name={[field.name, 'rules', `${rule.key}Duration`]} label="持续时间（秒）" className="mb-0">
+                                                            <InputNumber min={1} max={3600} className="w-full" />
+                                                        </Form.Item>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </Card>
+                                    ))}
+                                    <Button
+                                        onClick={() => add({ name: '', agentIds: [], rules: form.getFieldValue('rules') })}
+                                    >
+                                        添加主机规则组
+                                    </Button>
+                                </Space>
+                            )}
+                        </Form.List>
+                    </Card>
 
                     <Card title="HTTPS 证书告警规则" type="inner">
                         <Form.Item noStyle shouldUpdate>

@@ -170,7 +170,7 @@ const MonitorChartImpl = ({agentId, timeRange, start, end, isLive}: MonitorChart
 
     // 获取所有监控任务的列表（使用名称）
     const allMonitorKeys = useMemo(() => {
-        const series = metricsResponse?.data.series || [];
+        const series = (metricsResponse?.data.series || []).filter((series) => series.name === 'response_time');
         return series.map(s => s.labels?.monitor_name || s.labels?.monitor_id || s.name);
     }, [metricsResponse]);
 
@@ -188,7 +188,7 @@ const MonitorChartImpl = ({agentId, timeRange, start, end, isLive}: MonitorChart
 
     // 数据转换 - 支持多个监控任务（统一时间轴 + 线性插值）
     const chartData = useMemo(() => {
-        const series = metricsResponse?.data.series || [];
+        const series = (metricsResponse?.data.series || []).filter((series) => series.name === 'response_time');
         if (series.length === 0) return [];
 
         // 收集所有监控任务的数据

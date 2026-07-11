@@ -102,6 +102,11 @@ func (s *MetricService) convertToMetrics(agentID string, metricType string, data
 				"target":       monitorData.Target,
 			}
 			metrics = append(metrics, createMetric("pika_monitor_response_time_ms", agentID, labels, float64(monitorData.ResponseTime), timestamp))
+			statusValue := 0.0
+			if monitorData.Status == "up" {
+				statusValue = 1
+			}
+			metrics = append(metrics, createMetric("pika_monitor_status", agentID, labels, statusValue, timestamp))
 		}
 	}
 

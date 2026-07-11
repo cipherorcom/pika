@@ -115,7 +115,27 @@ type AlertConfig struct {
 	Enabled       bool               `json:"enabled"`       // 是否启用全局告警
 	MaskIP        bool               `json:"maskIP"`        // 是否在通知中打码 IP 地址
 	Rules         AlertRules         `json:"rules"`         // 告警规则
+	RuleGroups    []AlertRuleGroup   `json:"ruleGroups"`    // 按主机分组覆盖的告警规则
 	Notifications AlertNotifications `json:"notifications"` // 通知开关
+}
+
+// AlertRuleGroup 多台主机共享的一组资源告警规则。
+type AlertRuleGroup struct {
+	Name     string     `json:"name"`
+	AgentIDs []string   `json:"agentIds"`
+	Rules    AlertRules `json:"rules"`
+}
+
+// RulesForAgent 返回主机的有效资源告警规则；按规则组顺序取第一个匹配项。
+func (c AlertConfig) RulesForAgent(agentID string) AlertRules {
+	for _, group := range c.RuleGroups {
+		for _, id := range group.AgentIDs {
+			if id == agentID {
+				return group.Rules
+			}
+		}
+	}
+	return c.Rules
 }
 
 // AlertRules 告警规则

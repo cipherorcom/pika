@@ -706,10 +706,10 @@ func (s *MetricService) buildPromQLQueries(agentID, metricType string, interface
 
 	case "monitor":
 		// 监控：响应时间（该探针参与的所有监控任务）
-		queries = []metric.QueryDefinition{{
-			Name:  "response_time",
-			Query: fmt.Sprintf(`pika_monitor_response_time_ms{agent_id="%s"}`, agentID),
-		}}
+		queries = []metric.QueryDefinition{
+			{Name: "response_time", Query: fmt.Sprintf(`pika_monitor_response_time_ms{agent_id="%s"}`, agentID)},
+			{Name: "status", Query: fmt.Sprintf(`pika_monitor_status{agent_id="%s"}`, agentID)},
+		}
 	}
 
 	return expandAggregationQueries(queries, aggregation, step)

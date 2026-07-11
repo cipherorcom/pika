@@ -96,25 +96,26 @@ func (s *AlertService) CheckMetrics(ctx context.Context, agentID string, cpu, me
 	}
 
 	now := time.Now().UnixMilli()
+	rules := alertConfig.RulesForAgent(agentID)
 
 	// 检查 CPU 告警
-	if alertConfig.Rules.CPUEnabled {
-		s.checkAlert(ctx, alertConfig, &agent, "cpu", cpu, alertConfig.Rules.CPUThreshold, alertConfig.Rules.CPUDuration, now)
+	if rules.CPUEnabled {
+		s.checkAlert(ctx, alertConfig, &agent, "cpu", cpu, rules.CPUThreshold, rules.CPUDuration, now)
 	}
 
 	// 检查内存告警
-	if alertConfig.Rules.MemoryEnabled {
-		s.checkAlert(ctx, alertConfig, &agent, "memory", memory, alertConfig.Rules.MemoryThreshold, alertConfig.Rules.MemoryDuration, now)
+	if rules.MemoryEnabled {
+		s.checkAlert(ctx, alertConfig, &agent, "memory", memory, rules.MemoryThreshold, rules.MemoryDuration, now)
 	}
 
 	// 检查磁盘告警
-	if alertConfig.Rules.DiskEnabled {
-		s.checkAlert(ctx, alertConfig, &agent, "disk", disk, alertConfig.Rules.DiskThreshold, alertConfig.Rules.DiskDuration, now)
+	if rules.DiskEnabled {
+		s.checkAlert(ctx, alertConfig, &agent, "disk", disk, rules.DiskThreshold, rules.DiskDuration, now)
 	}
 
 	// 检查网速告警
-	if alertConfig.Rules.NetworkEnabled {
-		s.checkAlert(ctx, alertConfig, &agent, "network", networkSpeed, alertConfig.Rules.NetworkThreshold, alertConfig.Rules.NetworkDuration, now)
+	if rules.NetworkEnabled {
+		s.checkAlert(ctx, alertConfig, &agent, "network", networkSpeed, rules.NetworkThreshold, rules.NetworkDuration, now)
 	}
 
 	return nil

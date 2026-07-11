@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {Activity, BarChart3, CircleCheck, CircleX} from 'lucide-react';
 import {useQuery} from '@tanstack/react-query';
@@ -20,7 +20,7 @@ import {MonitorChart} from '@portal/components/server/MonitorChart.tsx';
 import {NetworkChart} from '@portal/components/server/NetworkChart.tsx';
 import {NetworkConnectionChart} from '@portal/components/server/NetworkConnectionChart.tsx';
 import {TemperatureChart} from '@portal/components/server/TemperatureChart.tsx';
-import {useAgentQuery, useLatestMetricsQuery} from '@portal/hooks/server.ts';
+import {useAgentQuery, useLatestMetricsQuery, useMetricsQuery} from '@portal/hooks/server.ts';
 import {LIVE_RANGE, SERVER_TIME_RANGE_OPTIONS} from '@portal/constants/time.ts';
 import {getPublicMonitors} from '@/api/monitor.ts';
 import type {PublicMonitor} from '@/types';
@@ -48,6 +48,15 @@ const ServerDetail = () => {
     // 实时模式 1s 拉取最新指标，其余 5s
     const {data: agentResponse, isLoading} = useAgentQuery(id);
     const {data: latestMetricsResponse} = useLatestMetricsQuery(id, isLive ? 1000 : 5000);
+    const {data: monitorHistoryResponse} = useMetricsQuery({
+        agentId: id || '',
+        type: 'monitor',
+        range: customStart !== undefined && customEnd !== undefined ? undefined : (isLive ? '15m' : timeRange),
+        start: customStart,
+        end: customEnd,
+        aggregation: 'raw',
+        refetchIntervalMs: isLive ? 10000 : undefined,
+    });
     const {data: publicMonitors = []} = useQuery<PublicMonitor[]>({
         queryKey: ['publicMonitors'],
         queryFn: async () => (await getPublicMonitors()).data || [],
@@ -62,6 +71,25 @@ const ServerDetail = () => {
     const configuredHostMonitors = publicMonitors.filter((monitor) =>
         monitor.enabled && (!monitor.agentIds?.length || monitor.agentIds.includes(id!)),
     );
+    const monitorHistoryStats = useMemo(() => {
+        const stats = new Map<string, { min?: number; max?: number; failures: number; total: number }>();
+        for (const series of monitorHistoryResponse?.data.series || []) {
+            const monitorID = series.labels?.monitor_id;
+            if (!monitorID || !series.data.length) continue;
+            const item = stats.get(monitorID) || {failures: 0, total: 0};
+            if (series.name === 'response_time') {
+                const values = series.data.map((point) => point.value);
+                item.min = Math.min(item.min ?? Infinity, ...values);
+                item.max = Math.max(item.max ?? -Infinity, ...values);
+            }
+            if (series.name === 'status') {
+                item.total += series.data.length;
+                item.failures += series.data.filter((point) => point.value < 0.5).length;
+            }
+            stats.set(monitorID, item);
+        }
+        return stats;
+    }, [monitorHistoryResponse]);
     const formatLoad = (value?: number) => (
         typeof value === 'number' && Number.isFinite(value) ? value.toFixed(2) : '-'
     );
@@ -200,6 +228,7 @@ const ServerDetail = () => {
                                             </div>
                                         {configuredHostMonitors.map((configuredMonitor) => {
                                             const monitor = latestMonitorByID.get(configuredMonitor.id);
+                                            const historyStats = monitorHistoryStats.get(configuredMonitor.id);
                                             const isUp = monitor?.status === 'up';
                                             const hasReported = !!monitor;
                                             return (
@@ -212,6 +241,11 @@ const ServerDetail = () => {
                                                         {!hasReported ? <Activity className="h-3.5 w-3.5"/> : isUp ? <CircleCheck className="h-3.5 w-3.5"/> : <CircleX className="h-3.5 w-3.5"/>}
                                                         {!hasReported ? '等待检测' : isUp ? '正常' : '异常'}
                                                     </p>
+                                                    <div className="mt-3 flex flex-wrap gap-x-2 gap-y-1 text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                                                        <span>↓ {Number.isFinite(historyStats?.min) ? `${Math.round(historyStats!.min!)}ms` : '-'}</span>
+                                                        <span>↑ {Number.isFinite(historyStats?.max) ? `${Math.round(historyStats!.max!)}ms` : '-'}</span>
+                                                        <span>丢包 {historyStats?.total ? `${((historyStats.failures / historyStats.total) * 100).toFixed(2)}%` : '-'}</span>
+                                                    </div>
                                                 </div>
                                             );
                                         })}
