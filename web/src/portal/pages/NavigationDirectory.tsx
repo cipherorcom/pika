@@ -1,7 +1,7 @@
 import {useMemo, useState} from 'react';
 import {Navigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import {Compass, ExternalLink, FolderOpen, Link2, LoaderCircle, Search, Sparkles} from 'lucide-react';
+import {ExternalLink, FolderOpen, Link2, LoaderCircle, Search} from 'lucide-react';
 import {getNavigationLinks, type NavigationLink} from '@/api/navigation.ts';
 
 const faviconProxyURL = (siteURL: string) => {
@@ -70,25 +70,14 @@ const NavigationDirectory = () => {
 
     return (
         <div className="mx-auto w-full max-w-7xl px-3 py-5 sm:px-6 sm:py-9 lg:px-8">
-            <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/75 p-5 shadow-[0_18px_45px_-32px_rgba(15,23,42,0.42)] backdrop-blur-md dark:border-cyan-300/15 dark:bg-slate-950/55 dark:shadow-[0_18px_55px_-30px_rgba(34,211,238,0.25)] sm:p-7">
+            <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/95 p-5 shadow-[0_18px_45px_-32px_rgba(15,23,42,0.42)] backdrop-blur-xl dark:border-cyan-300/25 dark:bg-[#071827]/95 dark:shadow-[0_18px_55px_-30px_rgba(34,211,238,0.25)] sm:p-7">
                 <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-cyan-400/15 blur-3xl dark:bg-cyan-300/12"/>
                 <div className="pointer-events-none absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl"/>
 
                 <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-50/80 px-3 py-1 text-[11px] font-bold tracking-[0.14em] text-cyan-700 dark:border-cyan-300/20 dark:bg-cyan-300/10 dark:text-cyan-100">
-                            <Sparkles className="h-3.5 w-3.5"/>
-                            CURATED LINKS
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20">
-                                <Compass className="h-6 w-6"/>
-                            </span>
-                            <div>
-                                <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">导航站</h1>
-                                <p className="mt-1 text-sm text-slate-500 dark:text-cyan-100/65">从共享表格同步的常用站点，一站直达。</p>
-                            </div>
-                        </div>
+                        <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl">导航站</h1>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-cyan-100/65">从共享表格同步的常用站点，一站直达。</p>
                     </div>
 
                     <label className="group relative block w-full lg:w-[340px]">
@@ -97,7 +86,7 @@ const NavigationDirectory = () => {
                             value={keyword}
                             onChange={(event) => setKeyword(event.target.value)}
                             placeholder="搜索名称、描述或网址..."
-                            className="h-11 w-full rounded-xl border border-slate-200 bg-white/90 pl-10 pr-3 text-sm text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-cyan-300/15 dark:bg-slate-950/60 dark:text-cyan-50 dark:placeholder:text-cyan-100/35"
+                            className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-cyan-300/25 dark:bg-[#020d18] dark:text-cyan-50 dark:placeholder:text-cyan-100/45"
                         />
                     </label>
                 </div>
@@ -109,7 +98,7 @@ const NavigationDirectory = () => {
                             onClick={() => setSelectedCategory(category)}
                             className={`shrink-0 rounded-lg px-3 py-2 text-xs font-bold transition ${selectedCategory === category
                                 ? 'bg-slate-900 text-white shadow-md shadow-slate-900/15 dark:bg-cyan-300 dark:text-slate-950'
-                                : 'border border-slate-200 bg-white/50 text-slate-600 hover:border-cyan-300 hover:text-cyan-700 dark:border-cyan-300/15 dark:bg-slate-950/35 dark:text-cyan-50/65 dark:hover:border-cyan-200/45 dark:hover:text-cyan-100'}`}
+                                : 'border border-slate-200 bg-white text-slate-600 hover:border-cyan-300 hover:text-cyan-700 dark:border-cyan-300/25 dark:bg-[#06131f] dark:text-cyan-50/75 dark:hover:border-cyan-200/55 dark:hover:text-cyan-100'}`}
                         >
                             {category}
                         </button>
@@ -123,13 +112,13 @@ const NavigationDirectory = () => {
                     <span className="text-sm">正在同步导航数据…</span>
                 </div>
             ) : isError ? (
-                <div className="mt-5 flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-rose-300/70 bg-white/60 p-6 text-center dark:border-rose-300/25 dark:bg-slate-950/45">
+                <div className="mt-5 flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-rose-300/70 bg-white/95 p-6 text-center dark:border-rose-300/35 dark:bg-[#071827]/95">
                     <Link2 className="h-9 w-9 text-rose-500"/>
                     <p className="mt-3 font-semibold text-slate-800 dark:text-white">暂时无法读取导航表格</p>
                     <p className="mt-1 max-w-md text-sm text-slate-500 dark:text-cyan-100/60">请确认 Google 表格已公开可查看，且首行包含 category、name、url、desc 四列。</p>
                 </div>
             ) : Object.keys(groupedLinks).length === 0 ? (
-                <div className="mt-5 flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/60 p-6 text-center dark:border-cyan-300/20 dark:bg-slate-950/45">
+                <div className="mt-5 flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/95 p-6 text-center dark:border-cyan-300/30 dark:bg-[#071827]/95">
                     <FolderOpen className="h-10 w-10 text-slate-400 dark:text-cyan-100/45"/>
                     <p className="mt-3 font-semibold text-slate-800 dark:text-white">没有找到匹配的站点</p>
                     <p className="mt-1 text-sm text-slate-500 dark:text-cyan-100/60">换个关键词，或在 Google 表格中添加导航项。</p>
@@ -150,7 +139,7 @@ const NavigationDirectory = () => {
                                         href={item.url}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="group relative flex min-h-[104px] items-start gap-3 overflow-hidden rounded-xl border border-slate-200/80 bg-white/75 p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/60 hover:shadow-lg hover:shadow-cyan-500/10 dark:border-cyan-300/13 dark:bg-slate-950/55 dark:hover:border-cyan-200/55"
+                                        className="group relative flex min-h-[104px] items-start gap-3 overflow-hidden rounded-xl border border-slate-200 bg-white/95 p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/60 hover:shadow-lg hover:shadow-cyan-500/10 dark:border-cyan-300/25 dark:bg-[#071827]/95 dark:hover:border-cyan-200/65"
                                     >
                                         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/0 to-transparent transition group-hover:via-cyan-400/70"/>
                                         <SiteIcon item={item}/>

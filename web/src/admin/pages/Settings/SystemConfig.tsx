@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { App, Button, Card, Form, Input, Radio, Slider, Space, Spin, Switch, Upload } from 'antd';
+import { App, Button, Card, Form, Input, Radio, Slider, Space, Spin, Upload } from 'antd';
 import { Upload as UploadIcon, Grid3x3, List } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SystemConfig } from '@/api/property.ts';
@@ -45,8 +45,6 @@ const SystemConfigComponent = () => {
                 defaultView: config.defaultView ?? true, // 默认为 grid 视图
                 backgroundOverlayOpacity: config.backgroundOverlayOpacity ?? 65,
                 chromeBlur: config.chromeBlur ?? 24,
-                navigationEnabled: config.navigationEnabled ?? false,
-                navigationSheetUrl: config.navigationSheetUrl ?? '',
                 customCSS: config.customCSS,
                 customJS: config.customJS,
             });
@@ -108,8 +106,8 @@ const SystemConfigComponent = () => {
                 backgroundBase64: backgroundPreview,
                 backgroundOverlayOpacity: values.backgroundOverlayOpacity ?? 65,
                 chromeBlur: values.chromeBlur ?? 24,
-                navigationEnabled: values.navigationEnabled ?? false,
-                navigationSheetUrl: values.navigationSheetUrl || '',
+                navigationEnabled: config?.navigationEnabled ?? false,
+                navigationSheetUrl: config?.navigationSheetUrl ?? '',
                 icpCode: values.icpCode || '',
                 defaultView: values.defaultView ?? true,
                 customCSS: values.customCSS || '',
@@ -130,8 +128,6 @@ const SystemConfigComponent = () => {
                 defaultView: config.defaultView ?? true,
                 backgroundOverlayOpacity: config.backgroundOverlayOpacity ?? 65,
                 chromeBlur: config.chromeBlur ?? 24,
-                navigationEnabled: config.navigationEnabled ?? false,
-                navigationSheetUrl: config.navigationSheetUrl ?? '',
                 customCSS: config.customCSS,
                 customJS: config.customJS,
             });
@@ -321,51 +317,6 @@ const SystemConfigComponent = () => {
                     </Card>
 
                     <Card
-                        title="公共导航站"
-                        type="inner"
-                        className="mb-4"
-                    >
-                        <Form.Item
-                            label="启用公共导航站"
-                            name="navigationEnabled"
-                            valuePropName="checked"
-                            extra="启用后会在公共页面顶部显示“导航站”标签页。"
-                        >
-                            <Switch checkedChildren="启用" unCheckedChildren="关闭" />
-                        </Form.Item>
-
-                        <Form.Item noStyle shouldUpdate={(previous, current) => previous.navigationEnabled !== current.navigationEnabled}>
-                            {({ getFieldValue }) => getFieldValue('navigationEnabled') && (
-                                <Form.Item
-                                    label="Google 表格地址"
-                                    name="navigationSheetUrl"
-                                    rules={[
-                                        { required: true, message: '请输入 Google 表格地址' },
-                                        { type: 'url', message: '请输入有效的 HTTPS 地址' },
-                                        {
-                                            validator: (_, value: string) => {
-                                                try {
-                                                    const url = new URL(value);
-                                                    if (url.protocol !== 'https:' || url.hostname !== 'docs.google.com' || !url.pathname.startsWith('/spreadsheets/d/')) {
-                                                        return Promise.reject(new Error('请填写 docs.google.com 的 Google 表格链接'));
-                                                    }
-                                                    return Promise.resolve();
-                                                } catch {
-                                                    return Promise.reject(new Error('请输入有效的 Google 表格地址'));
-                                                }
-                                            },
-                                        },
-                                    ]}
-                                    tooltip="表格需设置为“知道链接的任何人可查看”，系统会读取首个工作表。"
-                                    extra="首行固定为：category、name、url、desc；可在地址中携带 gid 读取指定工作表。"
-                                >
-                                    <Input placeholder="https://docs.google.com/spreadsheets/d/表格ID/edit#gid=0" />
-                                </Form.Item>
-                            )}
-                        </Form.Item>
-                    </Card>
-
-                    <Card
                         title="自定义代码"
                         type="inner"
                         className="mb-4"
@@ -445,7 +396,7 @@ const SystemConfigComponent = () => {
                                                         <p className="text-[9px] font-mono tracking-[0.25em] text-cyan-200/80 uppercase">{systemNameZh}</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-3 text-[10px] font-medium text-cyan-100/90"><span className="rounded bg-cyan-400/15 px-2 py-1">设备监控</span><span className="text-white/60">服务监控</span>{getFieldValue('navigationEnabled') && <span className="text-white/60">导航站</span>}</div>
+                                                <div className="flex items-center gap-3 text-[10px] font-medium text-cyan-100/90"><span className="rounded bg-cyan-400/15 px-2 py-1">设备监控</span><span className="text-white/60">服务监控</span></div>
                                             </div>
 
                                             <div className="flex-1 p-4">

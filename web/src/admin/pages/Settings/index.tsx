@@ -1,9 +1,10 @@
 import {Tabs} from 'antd';
-import {Bell, MessageSquare, Settings2, Wifi} from 'lucide-react';
+import {Bell, Compass, MessageSquare, Settings2, Wifi} from 'lucide-react';
 import AlertSettings from './AlertSettings';
 import NotificationChannels from './NotificationChannels';
 import SystemConfig from './SystemConfig';
 import PublicIPConfig from './PublicIPConfig';
+import NavigationSettings from './NavigationSettings';
 import {PageHeader} from "@admin/components";
 import {useSearchParams} from "react-router-dom";
 
@@ -38,6 +39,16 @@ const Settings = () => {
                 </span>
             ),
             children: <SystemConfig/>,
+        },
+        {
+            key: 'navigation',
+            label: (
+                <span className="flex items-center gap-2">
+                    <Compass size={16}/>
+                    导航站
+                </span>
+            ),
+            children: <NavigationSettings/>,
         },
         {
             key: 'channels',

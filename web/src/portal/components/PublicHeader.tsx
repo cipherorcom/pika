@@ -77,7 +77,7 @@ const PublicHeader = () => {
     const publicTabs = [
         {id: 'servers', icon: ServerIcon, label: '设备监控', to: '/'},
         {id: 'monitors', icon: Activity, label: '服务监控', to: '/monitors'},
-        ...(window.SystemConfig?.NavigationEnabled ? [{id: 'navigation', icon: Compass, label: '导航站', to: '/navigation'}] : []),
+        ...(window.SystemConfig?.NavigationEnabled ? [{id: 'navigation', icon: Compass, label: '导航', to: '/navigation'}] : []),
     ];
 
     return (
