@@ -91,29 +91,13 @@ const NavigationDirectory = () => {
                 <div className="pointer-events-none absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl"/>
 
                 <div className="relative">
-                    <div>
-                        <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl">导航站</h1>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-cyan-100/65">从共享表格同步的常用站点，一站直达。</p>
-                    </div>
-
-                    <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center">
-                        <div className="min-w-0 flex-1 overflow-x-auto pb-1 [scrollbar-width:none]">
-                            <div className="flex w-max gap-2">
-                                {categories.map((category) => (
-                                    <button
-                                        key={category}
-                                        onClick={() => setSelectedCategory(category)}
-                                        className={`shrink-0 rounded-lg px-3 py-2 text-xs font-bold transition ${selectedCategory === category
-                                            ? 'bg-slate-900 text-white shadow-md shadow-slate-900/15 dark:bg-cyan-300 dark:text-slate-950'
-                                            : 'border border-slate-200 bg-white text-slate-600 hover:border-cyan-300 hover:text-cyan-700 dark:border-cyan-300/25 dark:bg-[#06131f] dark:text-cyan-50/75 dark:hover:border-cyan-200/55 dark:hover:text-cyan-100'}`}
-                                    >
-                                        {category}
-                                    </button>
-                                ))}
-                            </div>
+                    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                        <div className="min-w-0">
+                            <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl">导航站</h1>
+                            <p className="mt-1 text-sm text-slate-500 dark:text-cyan-100/65">从共享表格同步的常用站点，一站直达。</p>
                         </div>
 
-                        <label className="group relative block w-full shrink-0 lg:w-64">
+                        <label className="group relative block w-full shrink-0 md:w-72 lg:w-80">
                             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-cyan-600 dark:text-cyan-100/50 dark:group-focus-within:text-cyan-200"/>
                             <input
                                 value={keyword}
@@ -123,6 +107,20 @@ const NavigationDirectory = () => {
                                 className="h-9 w-full rounded-lg border border-slate-200 bg-white/80 pl-8 pr-3 text-xs text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-cyan-300/20 dark:bg-[#020d18]/75 dark:text-cyan-50 dark:placeholder:text-cyan-100/45"
                             />
                         </label>
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+                        {categories.map((category) => (
+                            <button
+                                key={category}
+                                onClick={() => setSelectedCategory(category)}
+                                className={`rounded-lg px-3 py-2 text-xs font-bold transition ${selectedCategory === category
+                                    ? 'bg-slate-900 text-white shadow-md shadow-slate-900/15 dark:bg-cyan-300 dark:text-slate-950'
+                                    : 'border border-slate-200 bg-white text-slate-600 hover:border-cyan-300 hover:text-cyan-700 dark:border-cyan-300/25 dark:bg-[#06131f] dark:text-cyan-50/75 dark:hover:border-cyan-200/55 dark:hover:text-cyan-100'}`}
+                            >
+                                {category}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </section>
