@@ -41,8 +41,8 @@ Pika 是一个轻量级的探针监控系统，支持实时数据采集、存储
 
 ```bash
 # 下载配置文件
-curl -O https://raw.githubusercontent.com/dushixiang/pika/main/docker-compose.sqlite.yml
-curl -o config.yaml https://raw.githubusercontent.com/dushixiang/pika/main/config.sqlite.yaml
+curl -O https://raw.githubusercontent.com/cipherorcom/pika/blob/master/docker-compose.sqlite.yml
+curl -o config.yaml https://raw.githubusercontent.com/cipherorcom/pika/blob/master/config.sqlite.yaml
 
 # 修改配置（重要：修改 JWT Secret 和管理员密码）
 # 编辑 config.yaml
@@ -60,8 +60,8 @@ docker-compose -f docker-compose.sqlite.yml up -d
 
 ```bash
 # 下载配置文件
-curl -O https://raw.githubusercontent.com/dushixiang/pika/main/docker-compose.postgresql.yml
-curl -o config.yaml https://raw.githubusercontent.com/dushixiang/pika/main/config.postgresql.yaml
+curl -O https://raw.githubusercontent.com/cipherorcom/pika/blob/master/docker-compose.postgresql.yml
+curl -o config.yaml https://raw.githubusercontent.com/cipherorcom/pika/blob/master/config.postgresql.yaml
 
 # 修改配置（重要：修改数据库密码、JWT Secret 和管理员密码）
 # 编辑 config.yaml

@@ -1,4 +1,5 @@
-import {Heart, Github} from 'lucide-react';
+import {Github, Heart} from 'lucide-react';
+
 import {useTheme} from '../contexts/ThemeContext';
 
 const PublicFooter = () => {
@@ -25,7 +26,7 @@ const PublicFooter = () => {
                             <span className="text-slate-300 dark:text-cyan-900">|</span>
                             {/* GitHub 链接 */}
                             <a
-                                href="https://github.com/dushixiang/pika"
+                                href="https://github.com/cipherorcom/pika/tree/master"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-1.5 text-slate-600 dark:text-cyan-500 hover:text-cyan-500 dark:hover:text-cyan-300 transition-colors group"

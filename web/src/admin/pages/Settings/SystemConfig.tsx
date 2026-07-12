@@ -318,34 +318,6 @@ const SystemConfigComponent = () => {
                     </Card>
 
                     <Card
-                        title="自定义代码"
-                        type="inner"
-                        className="mb-4"
-                    >
-                        <Form.Item
-                            label="自定义 CSS"
-                            name="customCSS"
-                            tooltip="输入自定义 CSS 代码，将注入到页面 <style> 标签中"
-                        >
-                            <Input.TextArea
-                                placeholder="例如：body { background-color: #f0f0f0; }"
-                                rows={6}
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="自定义 JS"
-                            name="customJS"
-                            tooltip="输入自定义 JavaScript 代码，将注入到页面 <script> 标签中"
-                        >
-                            <Input.TextArea
-                                placeholder="例如：console.log('Hello World');"
-                                rows={6}
-                            />
-                        </Form.Item>
-                    </Card>
-
-                    <Card
                         title="预览效果"
                         type="inner"
                         className="mb-4"
@@ -396,6 +368,34 @@ const SystemConfigComponent = () => {
                                     </div>
                                 );
                             }}
+                        </Form.Item>
+                    </Card>
+
+                    <Card
+                        title="自定义代码"
+                        type="inner"
+                        className="mb-4"
+                    >
+                        <Form.Item
+                            label="自定义 CSS"
+                            name="customCSS"
+                            tooltip="输入自定义 CSS 代码，将注入到页面 <style> 标签中"
+                        >
+                            <Input.TextArea
+                                placeholder="例如：body { background-color: #f0f0f0; }"
+                                rows={6}
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="自定义 JS"
+                            name="customJS"
+                            tooltip="输入自定义 JavaScript 代码，将注入到页面 <script> 标签中"
+                        >
+                            <Input.TextArea
+                                placeholder="例如：console.log('Hello World');"
+                                rows={6}
+                            />
                         </Form.Item>
                     </Card>
 

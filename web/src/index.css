@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,ital,wght@6..96,1,600..900&family=Oxanium:wght@600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -182,7 +182,7 @@
     backdrop-filter: blur(8px);
 }
 
-/* 公共站点品牌字标：用独立展示字体和切角字形，避免与正文导航字体混在一起。 */
+/* 公共站点品牌字标：高对比衬线斜体和连字，形成独立的签名字形。 */
 .brand-lockup {
     min-width: 0;
     line-height: 1;
@@ -194,18 +194,17 @@
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-family: "Oxanium", "Arial Narrow", "Avenir Next Condensed", sans-serif;
-    font-size: clamp(1.2rem, 1.8vw, 1.65rem);
-    font-weight: 800;
-    letter-spacing: 0.075em;
-    line-height: 0.95;
-    text-transform: uppercase;
-    background: linear-gradient(112deg, #68e8ff 2%, #38bdf8 43%, #d7faff 44%, #ffffff 70%, #a5f3fc 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 18px rgba(34, 211, 238, 0.28);
-    transform: skewX(-7deg);
+    font-family: "Bodoni Moda", "Times New Roman", serif;
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+    font-style: italic;
+    font-weight: 700;
+    font-variant-ligatures: common-ligatures discretionary-ligatures;
+    font-feature-settings: "liga" 1, "dlig" 1;
+    letter-spacing: -0.1em;
+    line-height: 0.82;
+    color: #effdff;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 16px rgba(34, 211, 238, 0.16);
+    transform: skewX(-3deg);
     transform-origin: left center;
 }
 
@@ -223,7 +222,7 @@
 }
 
 .brand-lockup--compact .brand-wordmark {
-    font-size: 1rem;
+    font-size: 1.3rem;
 }
 
 .brand-lockup--compact .brand-submark {

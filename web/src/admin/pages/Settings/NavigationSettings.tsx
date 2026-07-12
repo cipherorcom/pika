@@ -139,12 +139,14 @@ const NavigationSettings = () => {
                         )}
                     </Form.Item>
 
-                    <Form.Item className="mb-0 mt-5 border-t border-slate-200 pt-5 dark:border-slate-700/80">
-                        <Space wrap size={10}>
-                            <Button type="primary" htmlType="submit" loading={saveMutation.isPending}>保存配置</Button>
-                            <Button href="/navigation" target="_blank" icon={<ExternalLink size={15}/>}>查看导航页</Button>
-                        </Space>
-                    </Form.Item>
+                    <div className="mt-6 border-t border-slate-200 pt-5 dark:border-slate-700/80">
+                        <Form.Item className="mb-0">
+                            <Space wrap size={10}>
+                                <Button type="primary" htmlType="submit" loading={saveMutation.isPending}>保存配置</Button>
+                                <Button href="/navigation" target="_blank" icon={<ExternalLink size={15}/>}>查看导航页</Button>
+                            </Space>
+                        </Form.Item>
+                    </div>
                 </Form>
             </Card>
         </div>
