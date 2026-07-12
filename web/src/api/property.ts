@@ -89,6 +89,7 @@ export interface SystemConfig {
     backgroundOverlayOpacity: number | null; // 公共页面背景遮罩透明度（0-100）
     chromeBlur: number | null; // 公共页面导航和页脚模糊度（0-24）
     navigationEnabled: boolean; // 是否启用公共导航站
+		navigationAnonymousAccess: boolean; // 导航站是否允许未登录访问
     navigationSheetUrl: string; // Google Sheets 公开表格地址
     icpCode: string;       // ICP 备案号
     defaultView: string;   // 默认视图 grid,list

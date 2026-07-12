@@ -55,29 +55,15 @@ const PublicHeader = () => {
         activeTab = 'navigation';
     }
 
-    let systemName = window.SystemConfig?.SystemNameEn;
+    const systemName = window.SystemConfig?.SystemNameEn || window.SystemConfig?.SystemNameZh || 'Pika Monitor';
 
-    let leftName = '';
-    let rightName = '';
-
-    if (systemName) {
-        // 优先在空格处分割
-        const spaceIndex = systemName.indexOf(' ');
-        if (spaceIndex > 0) {
-            leftName = systemName.substring(0, spaceIndex);
-            rightName = systemName.substring(spaceIndex); // 保留空格
-        } else {
-            // 如果没有空格，从中间分割
-            const mid = Math.floor(systemName.length / 2);
-            leftName = systemName.substring(0, mid);
-            rightName = systemName.substring(mid);
-        }
-    }
+    const canShowNavigation = window.SystemConfig?.NavigationEnabled
+        && (window.SystemConfig?.NavigationAnonymousAccess !== false || isLoggedIn);
 
     const publicTabs = [
         {id: 'servers', icon: ServerIcon, label: '设备监控', to: '/'},
         {id: 'monitors', icon: Activity, label: '服务监控', to: '/monitors'},
-        ...(window.SystemConfig?.NavigationEnabled ? [{id: 'navigation', icon: Compass, label: '导航', to: '/navigation'}] : []),
+        ...(canShowNavigation ? [{id: 'navigation', icon: Compass, label: '导航', to: '/navigation'}] : []),
     ];
 
     return (
@@ -103,13 +89,9 @@ const PublicHeader = () => {
                                         }}
                                     />
                                 </div>
-                                <div>
-                                    <h1 className="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-sky-500 to-teal-500 dark:from-cyan-300 dark:via-sky-300 dark:to-teal-300 uppercase italic">
-                                        {leftName}<span className="text-slate-800 dark:text-white">{rightName}</span>
-                                    </h1>
-                                    <p className="text-xs text-slate-500 dark:text-teal-200/75 font-mono tracking-[0.3em] uppercase">
-                                        {window.SystemConfig?.SystemNameZh}
-                                    </p>
+                                <div className="brand-lockup">
+                                    <h1 className="brand-wordmark" title={systemName}>{systemName}</h1>
+                                    <p className="brand-submark">{window.SystemConfig?.SystemNameZh}</p>
                                 </div>
                             </div>
                         </Link>

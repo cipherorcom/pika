@@ -107,6 +107,7 @@ const SystemConfigComponent = () => {
                 backgroundOverlayOpacity: values.backgroundOverlayOpacity ?? 65,
                 chromeBlur: values.chromeBlur ?? 24,
                 navigationEnabled: config?.navigationEnabled ?? false,
+				navigationAnonymousAccess: config?.navigationAnonymousAccess ?? true,
                 navigationSheetUrl: config?.navigationSheetUrl ?? '',
                 icpCode: values.icpCode || '',
                 defaultView: values.defaultView ?? true,
@@ -353,24 +354,7 @@ const SystemConfigComponent = () => {
                             {({ getFieldValue }) => {
                                 const systemNameEn = getFieldValue('systemNameEn') || '';
                                 const systemNameZh = getFieldValue('systemNameZh') || '';
-
-                                // 与 PublicHeader 相同的分割逻辑
-                                let leftName = '';
-                                let rightName = '';
-
-                                if (systemNameEn) {
-                                    // 优先在空格处分割
-                                    const spaceIndex = systemNameEn.indexOf(' ');
-                                    if (spaceIndex > 0) {
-                                        leftName = systemNameEn.substring(0, spaceIndex);
-                                        rightName = systemNameEn.substring(spaceIndex); // 保留空格
-                                    } else {
-                                        // 如果没有空格，从中间分割
-                                        const mid = Math.floor(systemNameEn.length / 2);
-                                        leftName = systemNameEn.substring(0, mid);
-                                        rightName = systemNameEn.substring(mid);
-                                    }
-                                }
+                                const brandName = systemNameEn || systemNameZh || 'Pika Monitor';
 
                                 const overlayOpacity = Math.min(100, Math.max(0, getFieldValue('backgroundOverlayOpacity') ?? 65));
                                 const chromeBlur = Math.min(24, Math.max(0, getFieldValue('chromeBlur') ?? 24));
@@ -391,9 +375,9 @@ const SystemConfigComponent = () => {
                                             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3" style={chromeStyle}>
                                                 <div className="flex items-center gap-2.5">
                                                     <img src={getLogoUrl()} alt="Logo 预览" className="h-8 w-8 rounded-md object-contain" onError={(e) => { e.currentTarget.src = '/logo.png'; }} />
-                                                    <div>
-                                                        <h1 className="text-base font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-300 to-teal-200 uppercase italic">{leftName}<span className="text-white">{rightName}</span></h1>
-                                                        <p className="text-[9px] font-mono tracking-[0.25em] text-cyan-200/80 uppercase">{systemNameZh}</p>
+                                                    <div className="brand-lockup brand-lockup--compact">
+                                                        <h1 className="brand-wordmark" title={brandName}>{brandName}</h1>
+                                                        <p className="brand-submark">{systemNameZh}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-3 text-[10px] font-medium text-cyan-100/90"><span className="rounded bg-cyan-400/15 px-2 py-1">设备监控</span><span className="text-white/60">服务监控</span></div>

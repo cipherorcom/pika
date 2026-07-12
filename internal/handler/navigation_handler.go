@@ -37,6 +37,9 @@ func (h *PropertyHandler) GetNavigation(c echo.Context) error {
 	if !config.NavigationEnabled {
 		return orz.NewError(http.StatusNotFound, "导航站未启用")
 	}
+	if !config.NavigationAnonymousAccess && c.Get("authenticated") != true {
+		return orz.NewError(http.StatusUnauthorized, "导航站需要登录后访问")
+	}
 
 	items, err := fetchNavigationLinks(c.Request().Context(), config.NavigationSheetURL)
 	if err != nil {

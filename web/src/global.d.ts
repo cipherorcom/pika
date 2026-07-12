@@ -10,6 +10,7 @@ declare global {
             BackgroundOverlayOpacity: number;
             ChromeBlur: number;
             NavigationEnabled: boolean;
+			NavigationAnonymousAccess: boolean;
             NavigationSheetURL: string;
             Version: string;
         };

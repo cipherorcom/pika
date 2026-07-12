@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@600;700;800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -179,4 +180,53 @@
 .dark .navigation-link-card {
     background-color: rgba(5, 22, 36, 0.78) !important;
     backdrop-filter: blur(8px);
+}
+
+/* 公共站点品牌字标：用独立展示字体和切角字形，避免与正文导航字体混在一起。 */
+.brand-lockup {
+    min-width: 0;
+    line-height: 1;
+}
+
+.brand-wordmark {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: "Oxanium", "Arial Narrow", "Avenir Next Condensed", sans-serif;
+    font-size: clamp(1.2rem, 1.8vw, 1.65rem);
+    font-weight: 800;
+    letter-spacing: 0.075em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    background: linear-gradient(112deg, #68e8ff 2%, #38bdf8 43%, #d7faff 44%, #ffffff 70%, #a5f3fc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 18px rgba(34, 211, 238, 0.28);
+    transform: skewX(-7deg);
+    transform-origin: left center;
+}
+
+.brand-submark {
+    display: block;
+    margin-top: 0.4rem;
+    padding-left: 0.13em;
+    color: rgb(153 246 228 / 0.88);
+    font-family: "Oxanium", ui-monospace, monospace;
+    font-size: 0.57rem;
+    font-weight: 700;
+    letter-spacing: 0.42em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.brand-lockup--compact .brand-wordmark {
+    font-size: 1rem;
+}
+
+.brand-lockup--compact .brand-submark {
+    margin-top: 0.28rem;
+    font-size: 0.43rem;
 }

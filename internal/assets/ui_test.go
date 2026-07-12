@@ -36,6 +36,7 @@ window.SystemConfig = {
     BackgroundOverlayOpacity: Number("[[if .BackgroundOverlayOpacity]][[.BackgroundOverlayOpacity]][[else]]65[[end]]"),
     ChromeBlur: Number("[[if .ChromeBlur]][[.ChromeBlur]][[else]]24[[end]]"),
     NavigationEnabled: "[[.NavigationEnabled]]" === "true",
+	NavigationAnonymousAccess: "[[.NavigationAnonymousAccess]]" !== "false",
     NavigationSheetURL: "[[.NavigationSheetURL]]",
     Version: "[[.Version]]",
 };
@@ -48,17 +49,18 @@ window.SystemConfig = {
 
 	provider := testSystemConfigProvider{
 		config: &models.SystemConfig{
-			SystemNameZh:             "皮卡监控",
-			SystemNameEn:             "Pika Monitor",
-			ICPCode:                  "ICP-1",
-			DefaultView:              "grid",
-			BackgroundOverlayOpacity: testIntPtr(65),
-			ChromeBlur:               testIntPtr(24),
-			NavigationEnabled:        true,
-			NavigationSheetURL:       "https://docs.google.com/spreadsheets/d/example/edit",
-			CustomJS:                 `console.log("pika");`,
-			CustomCSS:                `body { color: red; }`,
-			Version:                  "v1.2.3",
+			SystemNameZh:              "皮卡监控",
+			SystemNameEn:              "Pika Monitor",
+			ICPCode:                   "ICP-1",
+			DefaultView:               "grid",
+			BackgroundOverlayOpacity:  testIntPtr(65),
+			ChromeBlur:                testIntPtr(24),
+			NavigationEnabled:         true,
+			NavigationAnonymousAccess: false,
+			NavigationSheetURL:        "https://docs.google.com/spreadsheets/d/example/edit",
+			CustomJS:                  `console.log("pika");`,
+			CustomCSS:                 `body { color: red; }`,
+			Version:                   "v1.2.3",
 		},
 	}
 	if err := RenderUIFilesInDir(dir, provider); err != nil {
@@ -77,6 +79,7 @@ window.SystemConfig = {
 		`BackgroundOverlayOpacity: Number("65")`,
 		`ChromeBlur: Number("24")`,
 		`NavigationEnabled: "true" === "true"`,
+		`NavigationAnonymousAccess: "false" !== "false"`,
 		`NavigationSheetURL: "https://docs.google.com/spreadsheets/d/example/edit"`,
 		`console.log("pika");`,
 		`body { color: red; }`,

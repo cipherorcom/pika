@@ -14,6 +14,7 @@ window.SystemConfig ??= {
     BackgroundOverlayOpacity: 65,
     ChromeBlur: 24,
     NavigationEnabled: false,
+	NavigationAnonymousAccess: true,
     NavigationSheetURL: '',
     Version: '',
 };

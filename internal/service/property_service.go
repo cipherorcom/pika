@@ -136,14 +136,38 @@ func (s *PropertyService) GetNotificationChannelConfigs(ctx context.Context) ([]
 }
 
 func (s *PropertyService) GetSystemConfig(ctx context.Context) (*models.SystemConfig, error) {
-	var systemConfig models.SystemConfig
-	err := s.GetValue(ctx, PropertyIDSystemConfig, &systemConfig)
+	property, err := s.Get(ctx, PropertyIDSystemConfig)
 	if err != nil {
 		return nil, fmt.Errorf("获取系统配置失败: %w", err)
 	}
+
+	var systemConfig models.SystemConfig
+	if property.Value != "" {
+		if err := json.Unmarshal([]byte(property.Value), &systemConfig); err != nil {
+			return nil, fmt.Errorf("解析系统配置失败: %w", err)
+		}
+	}
+	applySystemConfigDefaults(&systemConfig, property.Value)
 	// 设置系统版本
 	systemConfig.Version = version.Version
 	return &systemConfig, nil
+}
+
+// applySystemConfigDefaults 为旧版配置补上新增字段，避免升级后改变原有公开访问行为。
+func applySystemConfigDefaults(config *models.SystemConfig, rawValue string) {
+	// 导航站上线时默认就是公开的；旧配置不存在该字段时继续保持公开。
+	config.NavigationAnonymousAccess = true
+	if rawValue == "" {
+		return
+	}
+
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(rawValue), &raw); err != nil {
+		return
+	}
+	if value, exists := raw["navigationAnonymousAccess"]; exists {
+		_ = json.Unmarshal(value, &config.NavigationAnonymousAccess)
+	}
 }
 
 // GetPublicIPConfig 获取公网 IP 采集配置
@@ -349,15 +373,16 @@ func (s *PropertyService) InitializeDefaultConfigs(ctx context.Context) error {
 			ID:   PropertyIDSystemConfig,
 			Name: "系统配置",
 			Value: models.SystemConfig{
-				SystemNameZh:             "皮卡监控",
-				SystemNameEn:             "Pika Monitor",
-				LogoBase64:               assets.DefaultLogoBase64(),
-				BackgroundOverlayOpacity: intPtr(65),
-				ChromeBlur:               intPtr(24),
-				NavigationEnabled:        false,
-				NavigationSheetURL:       "",
-				ICPCode:                  "",
-				DefaultView:              "grid",
+				SystemNameZh:              "皮卡监控",
+				SystemNameEn:              "Pika Monitor",
+				LogoBase64:                assets.DefaultLogoBase64(),
+				BackgroundOverlayOpacity:  intPtr(65),
+				ChromeBlur:                intPtr(24),
+				NavigationEnabled:         false,
+				NavigationAnonymousAccess: true,
+				NavigationSheetURL:        "",
+				ICPCode:                   "",
+				DefaultView:               "grid",
 			},
 		},
 		{

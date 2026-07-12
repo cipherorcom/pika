@@ -1,7 +1,7 @@
 import {useMemo, useState} from 'react';
 import {Navigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import {ExternalLink, FolderOpen, Link2, LoaderCircle, Search} from 'lucide-react';
+import {ExternalLink, FolderOpen, Link2, LoaderCircle, LockKeyhole, Search} from 'lucide-react';
 import {getNavigationLinks, type NavigationLink} from '@/api/navigation.ts';
 
 const faviconProxyURL = (siteURL: string) => {
@@ -37,11 +37,14 @@ const NavigationDirectory = () => {
     const [keyword, setKeyword] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('全部');
     const isEnabled = window.SystemConfig?.NavigationEnabled === true;
+    const allowsAnonymousAccess = window.SystemConfig?.NavigationAnonymousAccess !== false;
+    const hasSession = Boolean(localStorage.getItem('token') && localStorage.getItem('userInfo'));
+    const requiresLogin = !allowsAnonymousAccess && !hasSession;
 
     const {data: links = [], isLoading, isError} = useQuery<NavigationLink[]>({
         queryKey: ['navigationLinks'],
         queryFn: async () => (await getNavigationLinks()).data || [],
-        enabled: isEnabled,
+        enabled: isEnabled && !requiresLogin,
         staleTime: 5 * 60 * 1000,
     });
 
@@ -67,6 +70,19 @@ const NavigationDirectory = () => {
     if (!isEnabled) {
         return <Navigate to="/" replace/>;
     }
+
+	if (requiresLogin) {
+		return (
+			<div className="mx-auto flex min-h-[58vh] w-full max-w-7xl items-center justify-center px-3 py-5 sm:px-6 sm:py-9 lg:px-8">
+				<section className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-white/85 p-7 text-center shadow-[0_18px_45px_-32px_rgba(15,23,42,0.42)] backdrop-blur-md dark:border-cyan-300/20 dark:bg-slate-950/72 dark:shadow-[0_18px_55px_-30px_rgba(34,211,238,0.25)]">
+					<span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-600 dark:bg-cyan-300/10 dark:text-cyan-200"><LockKeyhole size={22}/></span>
+					<h1 className="mt-4 text-lg font-black text-slate-900 dark:text-white">导航站仅限登录后访问</h1>
+					<p className="mt-2 text-sm leading-6 text-slate-500 dark:text-cyan-100/65">管理员已关闭匿名访问。登录后即可查看已配置的导航链接。</p>
+					<a href="/login" className="mt-5 inline-flex h-10 items-center justify-center rounded-lg bg-cyan-600 px-4 text-sm font-semibold text-white transition hover:bg-cyan-500 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200">前往登录</a>
+				</section>
+			</div>
+		);
+	}
 
     return (
         <div className="mx-auto w-full max-w-7xl px-3 py-5 sm:px-6 sm:py-9 lg:px-8">

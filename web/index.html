@@ -15,6 +15,7 @@
             BackgroundOverlayOpacity: Number("[[if .BackgroundOverlayOpacity]][[.BackgroundOverlayOpacity]][[else]]65[[end]]"),
             ChromeBlur: Number("[[if .ChromeBlur]][[.ChromeBlur]][[else]]24[[end]]"),
             NavigationEnabled: "[[.NavigationEnabled]]" === "true",
+			NavigationAnonymousAccess: "[[.NavigationAnonymousAccess]]" !== "false",
             NavigationSheetURL: "[[.NavigationSheetURL]]",
             Version: "[[.Version]]",
         };

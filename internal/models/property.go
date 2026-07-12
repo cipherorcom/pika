@@ -53,19 +53,20 @@ type WebhookConfig struct {
 }
 
 type SystemConfig struct {
-	SystemNameZh             string `json:"systemNameZh"`             // 系统名称（中文）
-	SystemNameEn             string `json:"systemNameEn"`             // 系统名称（英文）
-	LogoBase64               string `json:"logoBase64"`               // 系统logo（base64编码）
-	BackgroundBase64         string `json:"backgroundBase64"`         // 公共页面背景图（base64编码）
-	BackgroundOverlayOpacity *int   `json:"backgroundOverlayOpacity"` // 公共页面背景遮罩透明度（0-100）
-	ChromeBlur               *int   `json:"chromeBlur"`               // 公共页面导航和页脚模糊度（0-24）
-	NavigationEnabled        bool   `json:"navigationEnabled"`        // 是否启用公共导航站
-	NavigationSheetURL       string `json:"navigationSheetUrl"`       // Google Sheets 公开表格地址
-	ICPCode                  string `json:"icpCode"`                  // ICP备案号
-	DefaultView              string `json:"defaultView"`              // 默认视图 grid | list
-	CustomCSS                string `json:"customCSS"`                // 自定义 CSS
-	CustomJS                 string `json:"customJS"`                 // 自定义 JS
-	Version                  string `json:"-"`                        // 系统版本
+	SystemNameZh              string `json:"systemNameZh"`              // 系统名称（中文）
+	SystemNameEn              string `json:"systemNameEn"`              // 系统名称（英文）
+	LogoBase64                string `json:"logoBase64"`                // 系统logo（base64编码）
+	BackgroundBase64          string `json:"backgroundBase64"`          // 公共页面背景图（base64编码）
+	BackgroundOverlayOpacity  *int   `json:"backgroundOverlayOpacity"`  // 公共页面背景遮罩透明度（0-100）
+	ChromeBlur                *int   `json:"chromeBlur"`                // 公共页面导航和页脚模糊度（0-24）
+	NavigationEnabled         bool   `json:"navigationEnabled"`         // 是否启用公共导航站
+	NavigationAnonymousAccess bool   `json:"navigationAnonymousAccess"` // 导航站是否允许未登录访问
+	NavigationSheetURL        string `json:"navigationSheetUrl"`        // Google Sheets 公开表格地址
+	ICPCode                   string `json:"icpCode"`                   // ICP备案号
+	DefaultView               string `json:"defaultView"`               // 默认视图 grid | list
+	CustomCSS                 string `json:"customCSS"`                 // 自定义 CSS
+	CustomJS                  string `json:"customJS"`                  // 自定义 JS
+	Version                   string `json:"-"`                         // 系统版本
 }
 
 // PublicIPConfig 公网 IP 采集配置
