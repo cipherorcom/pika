@@ -41,7 +41,7 @@ const MonitorDetail = () => {
     });
 
     if (isLoading) {
-        return <LoadingSpinner/>;
+        return <LoadingSpinner variant="detail" message="正在加载服务详情"/>;
     }
 
     if (!monitorDetail) {

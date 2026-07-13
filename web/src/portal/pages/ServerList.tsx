@@ -140,7 +140,7 @@ const ServerList = () => {
     const offlineCount = agents.length - onlineCount;
     const toggleOverviewFilter = (filter: string) => setSelectedTag(current => current === filter ? '' : filter);
 
-    if (isLoading) return <LoadingSpinner/>;
+    if (isLoading) return <LoadingSpinner variant="overview" message="正在同步探针数据"/>;
 
     return (
         <div className="mx-auto max-w-[1440px] px-3 py-4 sm:px-5 sm:py-6 lg:px-6">

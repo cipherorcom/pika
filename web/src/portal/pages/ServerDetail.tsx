@@ -102,7 +102,7 @@ const ServerDetail = () => {
         .filter((netInterface) => netInterface.addrs.length > 0);
 
     if (isLoading) {
-        return <LoadingSpinner/>;
+        return <LoadingSpinner variant="detail" message="正在加载主机详情"/>;
     }
 
     if (!agent) {

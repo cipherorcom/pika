@@ -1,21 +1,13 @@
 import {useEffect, useMemo, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import {AlertTriangle, BarChart3, CheckCircle2, Globe, Loader2, Maximize2, Search, Shield, Zap} from 'lucide-react';
+import {AlertTriangle, BarChart3, CheckCircle2, Globe, Maximize2, Search, Shield, Zap} from 'lucide-react';
 import {getPublicMonitors} from '@/api/monitor.ts';
 import type {PublicMonitor} from '@/types';
 import {cn} from '@/lib/utils.ts';
 import StatBlock from "@portal/components/StatBlock.tsx";
 import MonitorCard, {type DisplayMode} from "@portal/components/monitor/MonitorCard.tsx";
-
-const LoadingSpinner = () => (
-    <div className="flex min-h-[400px] w-full items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-gray-600 dark:text-cyan-500">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-600 dark:text-cyan-500"/>
-            <span className="text-sm font-mono">加载监控数据中...</span>
-        </div>
-    </div>
-);
+import {LoadingSpinner} from '@portal/components/LoadingSpinner.tsx';
 
 const EmptyState = () => (
     <div className="flex min-h-[400px] flex-col items-center justify-center text-gray-600 dark:text-cyan-500">
@@ -81,11 +73,7 @@ const MonitorList = () => {
     }, [monitors]);
 
     if (isLoading) {
-        return (
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-                <LoadingSpinner/>
-            </div>
-        );
+        return <LoadingSpinner variant="overview" message="正在同步服务监控数据"/>;
     }
 
     return (
