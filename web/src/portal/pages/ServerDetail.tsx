@@ -135,7 +135,7 @@ const ServerDetail = () => {
 
                     {/* 趋势模块的外层导航 */}
                     <div className="flex items-center justify-center" role="tablist" aria-label="主机指标">
-                        <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-1 dark:bg-black/30">
+                        <div className="flex items-center gap-1 rounded-lg border border-slate-200/80 bg-white/82 p-1 shadow-sm backdrop-blur-md dark:border-white/15 dark:bg-[#061a2c]/72">
                             <button
                                 type="button"
                                 role="tab"

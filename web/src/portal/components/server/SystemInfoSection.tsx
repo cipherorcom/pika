@@ -141,7 +141,7 @@ export const SystemInfoSection = ({agent, latestMetrics}: SystemInfoSectionProps
             icon: Network,
             title: '网络流量',
             usagePercent: latestMetrics.network
-                ? `${formatBytes(latestMetrics.network.totalBytesSentRate)}/s`
+                ? `${formatBytes(latestMetrics.network.totalBytesRecvRate)}/s`
                 : '—',
             accent: 'amber',
             metrics: networkMetrics,
